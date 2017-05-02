@@ -4,4 +4,5 @@ import Lib
 import Parse
 
 main :: IO ()
-main = someFunc
+main = do
+  putStrLn $ show $ stringToProgram "1 + 2;;"
