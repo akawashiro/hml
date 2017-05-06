@@ -1,7 +1,16 @@
-module Parse
-  ( stringToProgram,
-    Program
-  ) where
+{-# LANGUAGE FlexibleContexts #-}
+module Parse where
+-- module Parse
+  -- ( stringToProgram,
+  --   parsePlusExpr,
+  --   parsePlus,
+  --   parseMult,
+  --   parseMult',
+  --   parseApp,
+  --   parseA,
+  --   Program,
+  --   parse
+  -- ) where
 
 import Text.ParserCombinators.Parsec
 
@@ -15,9 +24,12 @@ data Expr = EInt Int
             | EFun String Expr
             | EApp Expr Expr
             | ELetRec String Expr Expr
+            | EVariable String
             deriving Show
 
 data BinOp = Plus | Mult | Lt deriving Show
+
+parseTest f = parse f "Test"
 
 stringToProgram :: String -> Either ParseError Program
 stringToProgram = parse parseProgram "Parse.hs"
@@ -28,39 +40,31 @@ parseProgram = many1 parseSentence
 parseSentence :: Parser Expr
 parseSentence = do{ e<-parseExpr; spaces; string ";;"; spaces; return e}
 
-parseExpr :: Parser Expr
-parseExpr = parseExpr' <|> parseExpr''
-
-parseExpr' = do
-  spaces
-  char '('
-  spaces
-  e <- parseExpr'''
-  spaces
-  char ')'
-  spaces
-  return e
-
-parseExpr'' = do
+parseExpr = do
   spaces
   e <- parseExpr'''
   spaces
   return e
 
 parseExpr''' :: Parser Expr
-parseExpr''' = parseBool <|>
-             parseBinOp <|>
-             parseIf <|>
-             parseLet <|>
-             parseLetRec <|> 
-             parseFun <|>
-             parseAppExpr
+parseExpr''' = try parseBool <|>
+             try parseIf <|>
+             try parseLet <|>
+             try parseLetRec <|> 
+             try parseFun <|>
+             try parseLtExpr <|>
+             try parseBinOp <|>
+             try parseAppExpr <|>
+             try parseVariable
+
+parseVariable :: Parser Expr
+parseVariable = do { s <- parseValiableName; return (EVariable s) }
 
 parseBinOp :: Parser Expr
-parseBinOp = parseLtExpr
+parseBinOp = try parseLtExpr
 
 parseLtExpr :: Parser Expr
-parseLtExpr = parseLtExpr' <|> parsePlusExpr
+parseLtExpr = try parseLtExpr' <|> try parsePlusExpr
 
 parseLtExpr' = do
   e1 <- parsePlusExpr
@@ -70,35 +74,46 @@ parseLtExpr' = do
   e2 <- parsePlusExpr
   return (EBinOp Lt e1 e2)
 
-parsePlusExpr = parsePlusExpr' <|> parseMultExpr
+parsePlus = parse parsePlusExpr "Plus"
+
+parsePlusExpr = try parsePlusExpr' <|> try parseMultExpr
 parsePlusExpr' = do
-  e1 <- parsePlusExpr
+  e1 <- parseMultExpr
   spaces
   char '+'
   spaces
-  e2 <- parseMultExpr
+  e2 <- parsePlusExpr
   return (EBinOp Plus e1 e2) 
 
-parseMultExpr = parseMultExpr' <|> parseAppExpr
+parseMult = parse parseMultExpr "Mult"
+parseMult' = parse parseMultExpr' "Mult"
+
+parseMultExpr = try parseMultExpr' <|> try parseAppExpr
 parseMultExpr' = do
-  e1 <- parseMultExpr
+  e1 <- parseAppExpr 
   spaces
   char '*'
   spaces
-  e2 <- parseAppExpr 
+  e2 <- parseMultExpr
   return (EBinOp Mult e1 e2)
 
-parseAppExpr = do { e1<-parseAppExpr; e2<-parseAExpr; return (EApp e1 e2) } <|> parseAExpr
+parseApp = parse parseAppExpr "App"
 
-parseAExpr = parseInt <|>
-             parseBool <|>
-             do { char '('; spaces; e<-parseExpr; spaces; char ')'; return e}
+parseAppExpr = parseAppExpr' <|> try parseAExpr
+parseAppExpr' = try (do { e1<-(try parseFun <|> parseVariable); many1 space; e2<-parseAppExpr; return (EApp e1 e2) })
 
+
+parseA = parse parseAExpr "A"
+parseAExpr = try parseInt <|>
+             try parseBool <|>
+             try (do { char '('; spaces; e<-parseExpr; spaces; char ')'; return e}) <|>
+             parseVariable
+             
 parseBool :: Parser Expr
 parseBool = (string "True" >> return (EBool True)) <|> (string "True" >> return (EBool True))
 
 parseInt :: Parser Expr
-parseInt = do { n<-many1 digit; return (EInt ((read n)::Int))}
+parseInt = try (do { n<-many1 digit; return (EInt ((read n)::Int))})
 
 parseIf :: Parser Expr
 parseIf = do {string "if"; spaces; c <- parseExpr; spaces; string "then"; spaces; e1 <- parseExpr; 
@@ -119,6 +134,7 @@ parseLet = do
   string "="
   spaces
   e1 <- parseExpr
+  spaces
   string "in"
   spaces
   e2 <- parseExpr

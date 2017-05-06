@@ -5,4 +5,6 @@ import Parse
 
 main :: IO ()
 main = do
-  putStrLn $ show $ stringToProgram "1 + 2;;"
+  input <- getContents
+  putStrLn input
+  putStrLn $ show $ stringToProgram input
