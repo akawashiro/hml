@@ -23,7 +23,7 @@ data Expr = EInt Int
             | ELet String Expr Expr
             | EFun String Expr
             | EApp Expr Expr
-            | ELetRec String Expr Expr
+            | ELetRec String String Expr Expr
             | EVariable String
             deriving Show
 
@@ -57,8 +57,14 @@ parseExpr''' = try parseBool <|>
              try parseAppExpr <|>
              try parseVariable
 
+reservedName = ["let","in","fun","if","then","else"]
+
 parseVariable :: Parser Expr
-parseVariable = do { s <- parseValiableName; return (EVariable s) }
+parseVariable = do 
+  s <- parseValiableName 
+  if elem s reservedName 
+  then fail "reservedName is used for variable name."
+  else return (EVariable s) 
 
 parseBinOp :: Parser Expr
 parseBinOp = try parseLtExpr
@@ -150,11 +156,18 @@ parseLetRec = do
   spaces
   string "="
   spaces
+  string "fun"
+  spaces
+  y <- parseValiableName
+  spaces
+  string "->"
+  spaces
   e1 <- parseExpr
+  spaces
   string "in"
   spaces
   e2 <- parseExpr
-  return (ELet x e1 e2)
+  return (ELetRec x y e1 e2)
 
 parseFun :: Parser Expr
 parseFun = do

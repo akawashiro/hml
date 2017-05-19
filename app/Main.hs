@@ -1,10 +1,12 @@
 module Main where
 
-import Lib
 import Parse
+import Eval
+import Control.Monad
 
 main :: IO ()
 main = do
   input <- getContents
-  putStrLn input
-  putStrLn $ show $ stringToProgram input
+  -- putStrLn input
+  print $ stringToProgram input
+  print $ programToExVal `liftM` stringToProgram input
