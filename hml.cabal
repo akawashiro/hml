@@ -15,11 +15,9 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib, Parse, Eval, Alpha
+  exposed-modules:     Lib, Parse, Eval
   build-depends:       base >= 4.7 && < 5
                      , parsec
-                     , mtl
-                     , containers
   default-language:    Haskell2010
 
 executable hml-exe
@@ -27,13 +25,6 @@ executable hml-exe
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
-                     , haskeline            >= 0.7.1.2
-                     , llvm-hs              >= 4.0.0.0
-                     , llvm-hs-pure         >= 4.0.0.0
-                     , parsec               >= 3.1
-                     , mtl                  >= 2.1.3
-                     , transformers         >= 0.3.0.0 && < 0.6
-                     , containers           >= 0.4
                      , hml
   default-language:    Haskell2010
 
