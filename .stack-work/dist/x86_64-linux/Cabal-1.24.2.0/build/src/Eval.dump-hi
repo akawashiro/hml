@@ -1,0 +1,237 @@
+
+==================== FINAL INTERFACE ====================
+2017-06-09 09:16:15.164184 UTC
+
+interface hml-0.1.0.0-KdOix18Qri95U7BZnPlCun:Eval 8002
+  interface hash: abf87555eb156f91fe0e6ecc3f45d656
+  ABI hash: 442cf60ee24bfb52ca67301d5012b5c5
+  export-list hash: 577813f3860e6fb0478d45873d25e240
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: ab396f11155bd696ab63895436e6f1df
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  Eval.exprToExVal
+  Eval.programToExVal
+  Eval.DnVal
+  Eval.Env
+  Eval.ExVal{Eval.VBool Eval.VInt Eval.VProc}
+module dependencies: Parse
+package dependencies: array-0.5.1.1@array-0.5.1.1 base-4.9.1.0*
+                      binary-0.8.3.0@binary-0.8.3.0
+                      bytestring-0.10.8.1@bytestring-0.10.8.1
+                      containers-0.5.7.1@containers-0.5.7.1
+                      deepseq-1.4.2.0@deepseq-1.4.2.0 ghc-prim-0.5.0.0
+                      integer-gmp-1.0.0.1 mtl-2.2.1@mtl-2.2.1-BLKBelFsPB3BoFeSWSOYj6
+                      parsec-3.1.11@parsec-3.1.11-113irVHGgd88sRnywByDNw
+                      text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR
+                      transformers-0.5.2.0@transformers-0.5.2.0
+orphans: base-4.9.1.0:GHC.Base base-4.9.1.0:GHC.Float
+         binary-0.8.3.0@binary-0.8.3.0:Data.Binary.Generic
+         bytestring-0.10.8.1@bytestring-0.10.8.1:Data.ByteString.Builder
+         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text
+         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text.Lazy
+         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text.Show
+         transformers-0.5.2.0@transformers-0.5.2.0:Control.Monad.Trans.Error
+family instance modules: base-4.9.1.0:Control.Applicative
+                         base-4.9.1.0:Data.Complex base-4.9.1.0:Data.Either
+                         base-4.9.1.0:Data.Functor.Const base-4.9.1.0:Data.Functor.Identity
+                         base-4.9.1.0:Data.List.NonEmpty base-4.9.1.0:Data.Monoid
+                         base-4.9.1.0:Data.Semigroup base-4.9.1.0:Data.Type.Equality
+                         base-4.9.1.0:Data.Version base-4.9.1.0:Data.Void
+                         base-4.9.1.0:GHC.Exts base-4.9.1.0:GHC.Generics
+                         base-4.9.1.0:GHC.IO.Exception base-4.9.1.0:GHC.TypeLits
+                         containers-0.5.7.1@containers-0.5.7.1:Data.IntMap.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.IntSet.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Map.Base
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Sequence
+                         containers-0.5.7.1@containers-0.5.7.1:Data.Set.Base
+                         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text
+                         text-1.2.2.1@text-1.2.2.1-Ji7hMs2U4BkBwavd4taEVR:Data.Text.Lazy
+import  -/  base-4.9.1.0:Data.Either 20b09ef8d0a5b74fdec011c40c1587f5
+import  -/  base-4.9.1.0:Data.Maybe d876c4ffe4b3c43755a781e8ad860d88
+import  -/  base-4.9.1.0:GHC.Base c4231c43c07e46080a26bf94094c7aa1
+import  -/  base-4.9.1.0:GHC.List ab8c4e523e6c479c549d3bcd5fc4a439
+import  -/  base-4.9.1.0:GHC.Num 00bfaa7b2f9d6084913c0697a8a49ec8
+import  -/  base-4.9.1.0:GHC.Show a027f5ac24879eaba752f44aa90fe511
+import  -/  base-4.9.1.0:Prelude 22dd289b8469a8fa8dc81cab7b237771
+import  -/  ghc-prim-0.5.0.0:GHC.Classes 0bdf3d057a415ec1b84a7b1994efbe47
+import  -/  Parse 404f4134e80b3268985d009262e261ad
+  exports: b1c1227c640cdb282e684c3d09ef80f5
+  EApp 9a0144f319e2b112097eac0bc49c6944
+  EBinOp 157514bf7036bd4411ef37c8504f8f0e
+  EBool 1b46b2fda3f2bddea0663335b5fb508b
+  EFun 037ae169a56ae9c389d176ebe480282f
+  EIf 1bef48bf9d9ed57b27d8e00207c1a9f0
+  EInt f47347167969decd15c75e2d6e225b11
+  ELet c8e58d1fbb76bc04cfaf3a387b2e327e
+  ELetRec 3fad13b21a2e994201e07daf97345bfb
+  EVariable 599ee1256804b46b04c59d4b3bf4307c
+  Expr 3c677ddf2e91efa2230f40d9e88e1bd3
+  Lt 4cd46035ac49eb38c3cbf958cc6ddc74
+  Mult 6b3cbfd683dc862c456147a14b93df33
+  Plus a0344562e21a258e668213714b1209d4
+  Program e8c162b99a11164090a4c50105db1e18
+e4526a487c94962576df48c6ac835c6c
+  $fShowExVal :: GHC.Show.Show Eval.ExVal
+  DFunId
+  {- Strictness: m, Inline: [ALWAYS] CONLIKE,
+     Unfolding: DFun:.
+                  @ Eval.ExVal
+                  Eval.$fShowExVal_$cshowsPrec
+                  Eval.$fShowExVal_$cshow
+                  Eval.$fShowExVal_$cshowList -}
+e4526a487c94962576df48c6ac835c6c
+  $fShowExVal1 :: Eval.ExVal -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (\ (w :: Eval.ExVal) (w1 :: GHC.Base.String) ->
+                 Eval.$w$cshowsPrec 0# w w1) -}
+e4526a487c94962576df48c6ac835c6c
+  $fShowExVal_$cshow :: Eval.ExVal -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ (x :: Eval.ExVal) ->
+                 Eval.$w$cshowsPrec 0# x (GHC.Types.[] @ GHC.Types.Char)) -}
+e4526a487c94962576df48c6ac835c6c
+  $fShowExVal_$cshowList :: [Eval.ExVal] -> GHC.Show.ShowS
+  {- Arity: 2,
+     Unfolding: (GHC.Show.showList__ @ Eval.ExVal Eval.$fShowExVal1) -}
+e4526a487c94962576df48c6ac835c6c
+  $fShowExVal_$cshowsPrec ::
+    GHC.Types.Int -> Eval.ExVal -> GHC.Show.ShowS
+  {- Arity: 3, Strictness: <S(S),1*U(U)><S,1*U><L,U>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (3, True, False)
+                (\ (w :: GHC.Types.Int)
+                   (w1 :: Eval.ExVal)
+                   (w2 :: GHC.Base.String) ->
+                 case w of ww { GHC.Types.I# ww1 ->
+                 Eval.$w$cshowsPrec ww1 w1 w2 }) -}
+c2903143c41047ffa296c925f2f7f181
+  $s$fShow(,)_$s$fShow(,)_$cshowList ::
+    [([GHC.Types.Char], Eval.ExVal)] -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (eta :: [([GHC.Types.Char], Eval.ExVal)])
+                   (eta1 :: GHC.Base.String) ->
+                 GHC.Show.showList__
+                   @ ([GHC.Types.Char], Eval.ExVal)
+                   (GHC.Show.$fShow(,)_$cshowsPrec
+                      @ [GHC.Types.Char]
+                      @ Eval.ExVal
+                      GHC.Show.$fShow[]_$s$fShow[]1
+                      Eval.$fShowExVal
+                      GHC.Show.shows22)
+                   eta
+                   eta1) -}
+462760c3f520a17b5d26e5669996b873
+  $tc'VBool :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   6138198350836506250##
+                   5427285495716596203##
+                   Eval.$trModule
+                   Eval.$tc'VBool1) -}
+2074c0c5c9527afd43ec5077cb83145f
+  $tc'VBool1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "'VBool"#) -}
+a60b20c9f3a3dd77b4c5ebeb2be83b2f
+  $tc'VInt :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   15920728977949588336##
+                   38643452838133038##
+                   Eval.$trModule
+                   Eval.$tc'VInt1) -}
+2200a696037f4652d72a82d94a2cc0a4
+  $tc'VInt1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "'VInt"#) -}
+a184bd8eac6139805a733cb96b12928f
+  $tc'VProc :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   5648971799382441368##
+                   8301788178977226371##
+                   Eval.$trModule
+                   Eval.$tc'VProc1) -}
+33b7315f06cd9d42012aca3b46c03b0f
+  $tc'VProc1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "'VProc"#) -}
+e684e986fdf256e9b21a945ad31a9d25
+  $tcExVal :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   3724360637772169032##
+                   4631199779509169403##
+                   Eval.$trModule
+                   Eval.$tcExVal1) -}
+962c798de5a477bdf1df7ced6ec0c52b
+  $tcExVal1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "ExVal"#) -}
+9727c3fa0bbdb2a215069ad2a1d5635d
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module Eval.$trModule2 Eval.$trModule1) -}
+412f76e6ab0ccf8d8f87dffa86345f8f
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "Eval"#) -}
+a632920753ca527f81d51e608c89b66a
+  $trModule2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS
+                   "hml-0.1.0.0-KdOix18Qri95U7BZnPlCun"#) -}
+e4526a487c94962576df48c6ac835c6c
+  $w$cshowsPrec ::
+    GHC.Prim.Int# -> Eval.ExVal -> GHC.Base.String -> GHC.Base.String
+  {- Arity: 3, Strictness: <S,U><S,1*U><L,U>, Inline: [0] -}
+e4526a487c94962576df48c6ac835c6c
+  type DnVal = Eval.ExVal
+25f8b1e4993c0c976fa512cb353712a7
+  type Env = [(GHC.Base.String, Eval.ExVal)]
+e4526a487c94962576df48c6ac835c6c
+  data ExVal
+    = VInt GHC.Types.Int
+    | VBool GHC.Types.Bool
+    | VProc GHC.Base.String Parse.Expr [(GHC.Base.String, Eval.DnVal)]
+4d8df5e0026f4abddbd92fb6083bd360
+  exprToExVal ::
+    Eval.Env
+    -> Parse.Expr -> Data.Either.Either GHC.Base.String Eval.ExVal
+  {- Arity: 2, Strictness: <L,U><S,1*U> -}
+6b4c555cb37815a62fc04866807c1b36
+  programToExVal ::
+    Parse.Program -> [Data.Either.Either GHC.Base.String Eval.ExVal]
+  {- Arity: 1,
+     Unfolding: (GHC.Base.map
+                   @ Parse.Expr
+                   @ (Data.Either.Either GHC.Base.String Eval.ExVal)
+                   Eval.programToExVal1) -}
+30c5e04258eca18f804c424fc4bb02ae
+  programToExVal1 ::
+    Parse.Expr -> Data.Either.Either GHC.Base.String Eval.ExVal
+  {- Arity: 1,
+     Unfolding: (Eval.exprToExVal
+                   (GHC.Types.[] @ (GHC.Base.String, Eval.ExVal))) -}
+instance [safe] GHC.Show.Show [Eval.ExVal] = Eval.$fShowExVal
+"SPEC/Eval $fShow(,)_$cshowList @ [Char] @ ExVal" [ALWAYS] forall ($dShow1 :: GHC.Show.Show
+                                                                                Eval.ExVal)
+                                                                  ($dShow :: GHC.Show.Show
+                                                                               [GHC.Types.Char])
+  GHC.Show.$fShow(,)_$cshowList @ [GHC.Types.Char]
+                                @ Eval.ExVal
+                                $dShow
+                                $dShow1
+  = Eval.$s$fShow(,)_$s$fShow(,)_$cshowList
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: safe
+require own pkg trusted: False
+
