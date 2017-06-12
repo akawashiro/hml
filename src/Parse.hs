@@ -13,6 +13,7 @@ module Parse where
   -- ) where
 
 import Text.ParserCombinators.Parsec
+import qualified Text.Parsec.Combinator as C (chainl1)
 
 type Program = [Expr]
 
@@ -38,33 +39,36 @@ parseProgram :: Parser Program
 parseProgram = many1 parseSentence
 
 parseSentence :: Parser Expr
-parseSentence = do{ e<-parseExpr; spaces; string ";;"; spaces; return e}
-
-parseExpr = do
+parseSentence = do
+  e<-parseExpr
   spaces
-  e <- parseExpr'''
+  string ";;"
   spaces
   return e
 
-parseExpr''' :: Parser Expr
-parseExpr''' = try parseBool <|>
+parseExpr = do
+  spaces
+  e <- parseExpr'
+  spaces
+  return e
+
+parseExpr' :: Parser Expr
+parseExpr' = try parseBool <|>
              try parseIf <|>
              try parseLet <|>
              try parseLetRec <|> 
              try parseFun <|>
-             try parseLtExpr <|>
              try parseBinOp <|>
-             try parseAppExpr <|>
              try parseVariable
 
 reservedName = ["let","in","fun","if","then","else"]
 
 parseVariable :: Parser Expr
-parseVariable = do 
-  s <- parseValiableName 
-  if elem s reservedName 
-  then fail "reservedName is used for variable name."
-  else return (EVariable s) 
+parseVariable = try (do
+  spaces 
+  s <- parseVariableName 
+  spaces
+  return (EVariable s))
 
 parseBinOp :: Parser Expr
 parseBinOp = try parseLtExpr
@@ -105,16 +109,20 @@ parseMultExpr' = do
 
 parseApp = parse parseAppExpr "App"
 
-parseAppExpr = parseAppExpr' <|> try parseAExpr
-parseAppExpr' = try (do { e1<-(try parseFun <|> parseVariable); many1 space; e2<-parseAppExpr; return (EApp e1 e2) })
-
+parseAppExpr = parseAppExpr' <|> parseAExpr
+parseAppExpr' = try (C.chainl1 parseAExpr parseAppExpr'')
+parseAppExpr'' :: Parser (Expr -> Expr -> Expr)
+parseAppExpr'' = do
+  spaces;
+  return EApp
 
 parseA = parse parseAExpr "A"
-parseAExpr = try parseInt <|>
+parseAExpr = try parseVariable <|>
+             try parseInt <|>
              try parseBool <|>
-             try (do { char '('; spaces; e<-parseExpr; spaces; char ')'; return e}) <|>
+             try (do { char '('; spaces; e<-parseExpr; spaces; char ')'; spaces; return e}) <|>
              parseVariable
-             
+
 parseBool :: Parser Expr
 parseBool = (string "True" >> return (EBool True)) <|> (string "True" >> return (EBool True))
 
@@ -125,17 +133,21 @@ parseIf :: Parser Expr
 parseIf = do {string "if"; spaces; c <- parseExpr; spaces; string "then"; spaces; e1 <- parseExpr; 
              spaces; string "else"; spaces; e2 <- parseExpr; return (EIf c e1 e2)}
 
-parseValiableName :: Parser String
-parseValiableName = do
+parseVariableName :: Parser String
+parseVariableName = try (do
+  spaces
   a <- lower
   as <- many alphaNum
-  return (a:as)
+  spaces
+  if elem (a:as) reservedName 
+  then fail "reservedName is used for variable name."
+  else return (a:as))
 
 parseLet :: Parser Expr
 parseLet = do
   string "let"
   spaces
-  x <- parseValiableName
+  x <- parseVariableName
   spaces
   string "="
   spaces
@@ -152,13 +164,13 @@ parseLetRec = do
   spaces
   string "rec"
   spaces
-  x <- parseValiableName
+  x <- parseVariableName
   spaces
   string "="
   spaces
   string "fun"
   spaces
-  y <- parseValiableName
+  y <- parseVariableName
   spaces
   string "->"
   spaces
@@ -173,7 +185,7 @@ parseFun :: Parser Expr
 parseFun = do
   string "fun"
   spaces
-  x <- parseValiableName
+  x <- parseVariableName
   spaces
   string "->"
   spaces

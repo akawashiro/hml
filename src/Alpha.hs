@@ -5,6 +5,9 @@ import Control.Monad.State
 import Data.Maybe
 import qualified Data.Map as Map
 
+programToAlphaProgram :: Program -> Program
+programToAlphaProgram p = map exprToAlphaExpr p
+
 exprToAlphaExpr :: Expr -> Expr
 exprToAlphaExpr exp = evalState (exprToAlphaExpr' exp) (Map.empty,0)
 
@@ -26,6 +29,10 @@ exprToAlphaExpr' :: Expr -> State NameState Expr
 exprToAlphaExpr' exp = case exp of
   EInt i -> return $ EInt i
   EBool b -> return $ EBool b
+  EBinOp o e1 e2 -> do
+    e1' <- exprToAlphaExpr' e1
+    e2' <- exprToAlphaExpr' e2
+    return $ EBinOp o e1' e2'
   EIf e1 e2 e3 -> do
     e1' <- exprToAlphaExpr' e1
     e2' <- exprToAlphaExpr' e2
