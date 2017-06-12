@@ -4,12 +4,17 @@ import Parse
 import Eval
 import Control.Monad
 import Alpha
+import KNormal
 
 main :: IO ()
 main = do
   input <- getContents
   putStrLn $ "input = \n" ++ input ++ "\n"
-  putStrLn $ "after parsing = \n" ++ (show $ stringToProgram input) ++ "\n"
-  putStrLn $ "after alpha conversion = \n" 
-             ++ (show $ programToAlphaProgram `liftM` (stringToProgram input)) ++ "\n"
-  print $ programToExVal `liftM` programToAlphaProgram `liftM` stringToProgram input
+  let parsed = stringToProgram input
+  putStrLn $ "after parsing = \n" ++ show parsed ++ "\n"
+  let knormaled = programToKNormalProgram `liftM` parsed
+  putStrLn $ "after KNormal = \n" ++ show knormaled ++ "\n"
+  let alphad = programToAlphaProgram `liftM` knormaled
+  putStrLn $ "after alpha conversion = \n" ++ show alphad ++ "\n"
+  let results = programToExVal `liftM` alphad
+  print results
