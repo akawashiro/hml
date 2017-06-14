@@ -156,6 +156,7 @@ parseLet = do
   string "in"
   spaces
   e2 <- parseExpr
+  spaces
   return (ELet x e1 e2)
 
 parseLetRec :: Parser Expr
@@ -179,6 +180,7 @@ parseLetRec = do
   string "in"
   spaces
   e2 <- parseExpr
+  spaces
   return (ELetRec x y e1 e2)
 
 parseFun :: Parser Expr

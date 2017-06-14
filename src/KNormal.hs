@@ -3,7 +3,6 @@ module KNormal where
 import Parse
 import Control.Monad.State
 import Data.Maybe
-import qualified Data.Map as Map
 
 programToKNormalProgram :: Program -> Program
 programToKNormalProgram = map exprToKNormalExpr
