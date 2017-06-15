@@ -5,12 +5,19 @@ import Control.Monad.State
 import Data.Maybe
 import qualified Data.Map as Map
 
+programToClosureProgram :: Program -> Program
+programToClosureProgram = map exprToClosureExpr
+
 -- exp -> known variables -> free variables
 exprToFreeVariables :: Expr -> [String] -> [String]
 exprToFreeVariables exp boundedVariables = case exp of
   EInt i -> []
   EBool b -> []
   EVariable v -> if v `elem` boundedVariables then [] else [v]
+  EBinOp o e1 e2 ->
+    let v1 = exprToFreeVariables e1 boundedVariables in
+    let v2 = exprToFreeVariables e2 boundedVariables in
+    v1 ++ v2
   EIf e1 e2 e3 ->
     let v1 = exprToFreeVariables e1 boundedVariables in
     let v2 = exprToFreeVariables e2 boundedVariables in
@@ -36,10 +43,9 @@ exprToClosureExpr :: Expr -> Expr
 exprToClosureExpr exp = evalState (exprToClosureExpr' exp) Map.empty
 
 -- exp -> free variables in exp -> closure form exp
-funToClosureFun :: Expr -> [String] -> Expr
-funToClosureFun (EFun s e) vs = EFun s (funToClosureFun e vs)
-funToClosureFun exp [] = exp
-funToClosureFun exp (v:vs) = funToClosureFun (EFun v exp) vs
+exprToClosureFun :: Expr -> [String] -> Expr
+exprToClosureFun exp [] = exp
+exprToClosureFun exp (v:vs) = exprToClosureFun (EFun v exp) vs
 
 callToClosureCall :: Expr -> [String] -> Expr
 callToClosureCall exp [] = exp
@@ -54,6 +60,10 @@ exprToClosureExpr' exp = case exp of
     case Map.lookup s m of
       Nothing -> return (EVariable s)
       Just vs -> return $ callToClosureCall (EVariable s) vs
+  EBinOp o e1 e2 -> do
+    e1' <- exprToClosureExpr' e1
+    e2' <- exprToClosureExpr' e2
+    return $ EBinOp o e1' e2'
   EIf e1 e2 e3 -> do
     e1' <- exprToClosureExpr' e1
     e2' <- exprToClosureExpr' e2
@@ -63,15 +73,23 @@ exprToClosureExpr' exp = case exp of
     e1' <- exprToClosureExpr' e1
     e2' <- exprToClosureExpr' e2
     return $ EApp e1' e2'
+  EFun s e -> do
+    e' <- exprToClosureExpr' e
+    return $ EFun s e'
   ELet s e1 e2 -> do
     m <- get
-    put $ Map.insert s (exprToFreeVariables e1) m
-    e1' <- exprToClosureExpr' e1
+    put $ Map.insert s (reverse (exprToFreeVariables e1 [])) m
+    e1' <- exprToClosureExpr' (exprToClosureFun e1 (exprToFreeVariables e1 []))
     e2' <- exprToClosureExpr' e2
     return $ ELet s e1' e2'
   ELetRec s1 s2 e1 e2 -> do
     m <- get
-    put $ Map.insert s1 (filter (/= s2) exprToFreeVariables e1) m
-    e1' <- exprToClosureExpr' e1
+    put $ Map.insert s1 (reverse fs) m
+    e1' <- exprToClosureExpr' (exprToClosureFun (EFun s2 e1) (cutLast1 fs))
     e2' <- exprToClosureExpr' e2
-    return $ ELetRec s1 s2 e1 e2
+    return $ ELetRec s1 (head (reverse (cutLast1 fs) ++ [s2])) e1' e2'
+      where
+        fs = (filter (/= s2) $ exprToFreeVariables e1 [])
+        cutLast1 [] = []
+        cutLast1 [a] = []
+        cutLast1 (v:vs) = v:cutLast1 vs
