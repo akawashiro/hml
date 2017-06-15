@@ -85,11 +85,11 @@ exprToClosureExpr' exp = case exp of
   ELetRec s1 s2 e1 e2 -> do
     m <- get
     put $ Map.insert s1 (reverse fs) m
-    e1' <- exprToClosureExpr' (exprToClosureFun (EFun s2 e1) (cutLast1 fs))
+    e1' <- exprToClosureExpr' (exprToClosureFun e1 (cutLast1 fs))
     e2' <- exprToClosureExpr' e2
-    return $ ELetRec s1 (head (reverse (cutLast1 fs) ++ [s2])) e1' e2'
+    return $ ELetRec s1 (last fs) e1' e2'
       where
-        fs = (filter (/= s2) $ exprToFreeVariables e1 [])
+        fs = s2:filter (/= s2) (exprToFreeVariables e1 [])
         cutLast1 [] = []
         cutLast1 [a] = []
         cutLast1 (v:vs) = v:cutLast1 vs
