@@ -84,7 +84,7 @@ exprToClosureExpr' exp = case exp of
     return $ ELet s e1' e2'
   ELetRec s1 s2 e1 e2 -> do
     m <- get
-    put $ Map.insert s1 (reverse fs) m
+    put $ Map.insert s1 (reverse (tail fs)) m
     e1' <- exprToClosureExpr' (exprToClosureFun e1 (cutLast1 fs))
     e2' <- exprToClosureExpr' e2
     return $ ELetRec s1 (last fs) e1' e2'
