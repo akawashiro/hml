@@ -12,23 +12,21 @@ main :: IO ()
 main = do
   input <- getContents
   putStrLn $ "input = \n" ++ input ++ "\n"
+
   let parsed = stringToProgram input
   putStrLn $ "after parsing = \n" ++ show parsed ++ "\n"
 
-  let closured = programToClosureProgram `liftM` parsed
+  let alphad = programToAlphaProgram `liftM` parsed
+  putStrLn $ "after alpha conversion = \n" ++ show alphad ++ "\n"
+
+  let closured = programToClosureProgram `liftM` alphad
   putStrLn $ "after closure translation = \n" ++ show closured ++ "\n"
 
   let flatted = programToFlatProgram `liftM` closured
   putStrLn $ "after flatting = \n" ++ show flatted ++ "\n"
-  let results = programToExVal `liftM` flatted
+
+  let knormaled = programToKNormalProgram `liftM` closured
+  putStrLn $ "after KNormal = \n" ++ show knormaled ++ "\n"
+
+  let results = programToExVal `liftM` knormaled
   print results
-  -- let results = programToExVal `liftM` closured'
-  -- print results
-  -- let knormaled = programToKNormalProgram `liftM` parsed
-  -- putStrLn $ "after KNormal = \n" ++ show knormaled ++ "\n"
-  -- let alphad = programToAlphaProgram `liftM` knormaled
-  -- putStrLn $ "after alpha conversion = \n" ++ show alphad ++ "\n"
-  -- let closured = programToClosureProgram `liftM` alphad
-  -- putStrLn $ "after closure translation = \n" ++ show closured ++ "\n"
-  -- let results = programToExVal `liftM` alphad
-  -- print results

@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+
 module Parse where
 -- module Parse
   -- ( stringToProgram,
@@ -26,9 +27,25 @@ data Expr = EInt Int
             | EApp Expr Expr
             | ELetRec String String Expr Expr
             | EVariable String
-            deriving Show
 
-data BinOp = Plus | Mult | Lt deriving Show
+data BinOp = Plus | Mult | Lt
+
+instance Show BinOp where
+  show Plus = "+"
+  show Mult = "*"
+  show Lt   = "<"
+
+instance Show Expr where
+  show (EInt i) = show i
+  show (EBool b) = show b
+  show (EBinOp o e1 e2) = show e1 ++ " " ++ show o ++ " " ++ show e2
+  show (EVariable s) = s
+  show (EFun s e) = "fun " ++ s ++ " -> " ++ show e
+  show (EIf e1 e2 e3) = "if " ++ show e1 ++ " then " ++ show e2 ++ " else " ++ show e3
+  show (ELet s e1 e2) = "let " ++ s ++ " = " ++ show e1 ++ " in\n " ++ show e2
+  show (ELetRec s1 s2 e1 e2) = "let rec " ++ s1 ++ " = fun " ++ s2 ++ " -> " ++ show e1 ++ " in\n " ++ show e2
+  show (EApp e1 e2) = show e1 ++ " " ++ show e2
+
 
 parseTest f = parse f "Test"
 
