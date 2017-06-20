@@ -19,14 +19,14 @@ main = do
   let alphad = programToAlphaProgram `liftM` parsed
   putStrLn $ "after alpha conversion = \n" ++ show alphad ++ "\n"
 
-  let closured = programToClosureProgram `liftM` alphad
+  let knormaled = programToKNormalProgram `liftM` alphad
+  putStrLn $ "after KNormal = \n" ++ show knormaled ++ "\n"
+
+  let closured = programToClosureProgram `liftM` knormaled
   putStrLn $ "after closure translation = \n" ++ show closured ++ "\n"
 
   let flatted = programToFlatProgram `liftM` closured
   putStrLn $ "after flatting = \n" ++ show flatted ++ "\n"
 
-  let knormaled = programToKNormalProgram `liftM` closured
-  putStrLn $ "after KNormal = \n" ++ show knormaled ++ "\n"
-
-  let results = programToExVal `liftM` knormaled
+  let results = programToExVal `liftM` flatted
   print results
