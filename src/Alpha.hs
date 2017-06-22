@@ -1,5 +1,7 @@
 module Alpha where
 
+-- Alpha conversion and convert Let function defintion into LetRec defintion.
+
 import Parse
 import Control.Monad.State
 import Data.Maybe
@@ -43,7 +45,13 @@ exprToAlphaExpr' exp = case exp of
     e1' <- exprToAlphaExpr' e1
     e2' <- exprToAlphaExpr' e2
     s' <- rename s
-    return $ ELet s' e1' e2'
+    case e1' of
+      EFun s'' e1'' -> do
+        addNewName s''
+        e1''' <- exprToAlphaExpr' e1''
+        s''' <- rename s''
+        return $ ELetRec s' s''' e1''' e2'
+      _ -> return $ ELet s' e1' e2'
   EFun s e -> do
     addNewName s
     s' <- rename s

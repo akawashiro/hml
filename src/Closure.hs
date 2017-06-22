@@ -77,9 +77,7 @@ exprToClosureExpr' exp = case exp of
     e' <- exprToClosureExpr' e
     return $ EFun s e'
   ELet s e1 e2 -> do
-    m <- get
-    put $ Map.insert s (reverse (exprToFreeVariables e1 [])) m
-    e1' <- exprToClosureExpr' (exprToClosureFun e1 (exprToFreeVariables e1 []))
+    e1' <- exprToClosureExpr' e1
     e2' <- exprToClosureExpr' e2
     return $ ELet s e1' e2'
   ELetRec s1 s2 e1 e2 -> do

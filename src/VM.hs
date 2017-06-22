@@ -2,6 +2,7 @@ import Parse
 
 data VMCode = MInt Int
             | MArg Int
+            | MLocal Int
             | MJump String [VMCode]
             | MLabel String
             | MBinOp BinOp VMCode VMCode
