@@ -87,7 +87,7 @@ exprToClosureExpr' exp = case exp of
     e2' <- exprToClosureExpr' e2
     return $ ELetRec s1 (last fs) e1' e2'
       where
-        fs = s2:filter (/= s2) (exprToFreeVariables e1 [])
+        fs = s2:filter (\x -> x /= s2 && x/=s1) (exprToFreeVariables e1 [])
         cutLast1 [] = []
         cutLast1 [a] = []
         cutLast1 (v:vs) = v:cutLast1 vs
