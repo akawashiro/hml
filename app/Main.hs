@@ -8,31 +8,38 @@ import KNormal
 import Closure
 import Flat
 import Declare
+import Call
 
 main :: IO ()
 main = do
   input <- getContents
   putStrLn $ "input = \n" ++ input ++ "\n"
 
-  let parsed = stringToProgram input
+  let parsed = stringToExpr input
   putStrLn $ "after parsing = \n" ++ show parsed ++ "\n"
 
-  let alphad = programToAlphaProgram `liftM` parsed
+  let alphad = exprToAlphaExpr `liftM` parsed
   putStrLn $ "after alpha conversion = \n" ++ show alphad ++ "\n"
 
-  let closured = programToClosureProgram `liftM` alphad
+  let closured = exprToClosureExpr `liftM` alphad
   putStrLn $ "after closure translation = \n" ++ show closured ++ "\n"
 
-  let knormaled = programToKNormalProgram `liftM` closured
+  let knormaled = exprToKNormalExpr `liftM` closured
   putStrLn $ "after KNormal = \n" ++ show knormaled ++ "\n"
 
-  let flatted = programToFlatProgram `liftM` knormaled
+  let flatted = exprToFlatExpr `liftM` knormaled
   putStrLn $ "after flatting = \n" ++ show flatted ++ "\n"
 
-  let decls = (map exprToDeclList) `liftM` flatted
-  putStrLn $ "Declaration = \n" ++ show decls
+  let ists = exprToInstructionList `liftM` flatted
+  putStrLn $ "Instructions = \n" ++ show ists
 
-  let results = programToExVal `liftM` flatted
+  let ists' = exprToDeclareList `liftM` flatted
+  putStrLn $ "Declares = \n" ++ show ists'
+
+  let called = (liftM (liftM (liftM processCall))) ists'
+  putStrLn $ "After call normalization = \n" ++ show called
+
+  let results = exprToExVal [] `liftM` flatted
   putStrLn "\nresults ="
   print results
 

@@ -4,11 +4,12 @@ module Alpha where
 
 import Parse
 import Control.Monad.State
+import Control.Monad
 import Data.Maybe
 import qualified Data.Map as Map
 
-programToAlphaProgram :: Program -> Program
-programToAlphaProgram p = map exprToAlphaExpr p
+-- programToAlphaProgram :: Program -> Program
+-- programToAlphaProgram = map exprToAlphaExpr
 
 exprToAlphaExpr :: Expr -> Expr
 exprToAlphaExpr exp = evalState (exprToAlphaExpr' exp) (Map.empty,0)
@@ -18,9 +19,7 @@ type NameState = (Map.Map String String, Int)
 addNewName :: String -> State NameState ()
 addNewName s = do
   (m,i) <- get
-  if Map.member s m
-  then return ()
-  else put $ (Map.insert s (s ++ "_" ++ show i) m , i+1)
+  unless (Map.member s m) $ put (Map.insert s (s ++ "_" ++ show i) m , i+1)
 
 rename :: String -> State NameState String
 rename s = do

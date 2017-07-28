@@ -4,8 +4,8 @@ import Parse
 import Control.Monad.State
 import Data.Maybe
 
-programToKNormalProgram :: Program -> Program
-programToKNormalProgram = map exprToKNormalExpr
+-- programToKNormalProgram :: Program -> Program
+-- programToKNormalProgram = map exprToKNormalExpr
 
 exprToKNormalExpr :: Expr -> Expr
 exprToKNormalExpr exp = evalState (exprToKNormalExpr' exp) 0

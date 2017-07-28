@@ -2,8 +2,8 @@ module Flat where
 
 import Parse
 
-programToFlatProgram :: Program -> Program
-programToFlatProgram = map exprToFlatExpr
+-- programToFlatProgram :: Program -> Program
+-- programToFlatProgram = map exprToFlatExpr
 
 exprToFlatExpr :: Expr -> Expr
 exprToFlatExpr exp =

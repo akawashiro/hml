@@ -5,8 +5,8 @@ import Control.Monad.State
 import Data.Maybe
 import qualified Data.Map as Map
 
-programToClosureProgram :: Program -> Program
-programToClosureProgram = map exprToClosureExpr
+-- programToClosureProgram :: Program -> Program
+-- programToClosureProgram = map exprToClosureExpr
 
 -- exp -> known variables -> free variables
 exprToFreeVariables :: Expr -> [String] -> [String]

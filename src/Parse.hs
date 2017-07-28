@@ -1,22 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Parse where
--- module Parse
-  -- ( stringToProgram,
-  --   parsePlusExpr,
-  --   parsePlus,
-  --   parseMult,
-  --   parseMult',
-  --   parseApp,
-  --   parseA,
-  --   Program,
-  --   parse
-  -- ) where
 
 import Text.ParserCombinators.Parsec
 import qualified Text.Parsec.Combinator as C (chainl1)
-
-type Program = [Expr]
 
 data Expr = EInt Int 
             | EBool Bool 
@@ -49,11 +36,8 @@ instance Show Expr where
 
 parseTest f = parse f "Test"
 
-stringToProgram :: String -> Either ParseError Program
-stringToProgram = parse parseProgram "Parse.hs"
-
-parseProgram :: Parser Program
-parseProgram = many1 parseSentence
+stringToExpr :: String -> Either ParseError Expr
+stringToExpr = parse parseSentence "Parse.hs"
 
 parseSentence :: Parser Expr
 parseSentence = do
@@ -144,7 +128,7 @@ parseBool :: Parser Expr
 parseBool = (string "True" >> return (EBool True)) <|> (string "True" >> return (EBool True))
 
 parseInt :: Parser Expr
-parseInt = try (do { n<-many1 digit; return (EInt ((read n)::Int))})
+parseInt = try (do { n<-many1 digit; return (EInt (read n::Int))})
 
 parseIf :: Parser Expr
 parseIf = do {string "if"; spaces; c <- parseExpr; spaces; string "then"; spaces; e1 <- parseExpr; 
@@ -156,7 +140,7 @@ parseVariableName = try (do
   a <- lower
   as <- many alphaNum
   spaces
-  if elem (a:as) reservedName 
+  if (a:as) `elem` reservedName 
   then fail "reservedName is used for variable name."
   else return (a:as))
 
