@@ -52,5 +52,3 @@ allocate' (ist:ists) = case ist of
   _ -> do
     ists' <- allocate' ists
     return $ ist : ists'
-
-
