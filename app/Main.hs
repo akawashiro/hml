@@ -9,6 +9,7 @@ import Closure
 import Flat
 import Declare
 import Call
+import RegisterAllocate
 
 main :: IO ()
 main = do
@@ -38,6 +39,9 @@ main = do
 
   let called = (liftM (liftM (liftM processCall))) ists'
   putStrLn $ "After call normalization = \n" ++ show called
+
+  let alloced = (liftM (liftM (liftM allocate))) called
+  putStrLn $ "After allocation = \n" ++ show alloced
 
   let results = exprToExVal [] `liftM` flatted
   putStrLn "\nresults ="
