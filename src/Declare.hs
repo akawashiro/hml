@@ -5,7 +5,6 @@ import Control.Monad.State
 import Control.Monad.Trans.Either
 
 data Instruction = IInt Int
-            | IBinOp BinOp String String String
             | IAdd  String String String
             | IMul  String String String
             | IBeqz String String -- First operand is condition
@@ -18,26 +17,34 @@ data Instruction = IInt Int
             | IJump String
             | IJal String
             | IJR   String
-            | IPrint String
+            | ISw String String Int -- sw r1 r2 offset offset(r2) = r1
+            | ILw String String Int -- lw r1 r2 offset r1 = offset(r2)
+            | IStore
+            | IRestore
+            | ISys
 
 type Declare = [Instruction]
 
 instance Show Instruction where
   show (IInt i)             = "\t" ++ show i ++ "\n"
-  show (IBinOp op rs rt rd) = "\t" ++ rd ++ " = " ++ rs ++ " " ++ show op ++ " " ++ rt ++ "\n"
-  show (IAdd rs rt rd)      = "\t" ++ "add " ++ rs ++ " " ++ rt ++ " " ++ rd ++ "\n"
-  show (IMul rs rt rd)      = "\t" ++ "mul " ++ rs ++ " " ++ rt ++ " " ++ rd ++ "\n"
-  show (IBeqz c l)          = "\t" ++ "beqz " ++ c ++ " " ++ l ++ "\n"
-  show (IOriZ r i)          = "\t" ++ "oriz " ++ r ++ " $0 " ++ show i ++ "\n"
+  show (IAdd rd rs rt)      = "\t" ++ "add " ++ rd ++ "," ++ rs ++ "," ++ rt ++ "\n"
+  show (IMul rd rs rt)      = "\t" ++ "mul " ++ rd ++ "," ++ rs ++ "," ++ rt ++ "\n"
+  show (IBeqz c l)          = "\t" ++ "beqz " ++ c ++ "," ++ l ++ "\n"
+  show (IOriZ r i)          = "\t" ++ "oriz " ++ r ++ ",$0," ++ show i ++ "\n"
   show (ICall f as rd)      = "\t" ++ rd ++ " = " ++ f ++ " " ++ show as ++ "\n"
   show (IArgs as)           = "\t" ++ "args " ++ show as ++ "\n"
-  show (IMove rs rt)        = "\t" ++ "move " ++ rs ++ " " ++ rt ++ "\n"
+  show (IMove rs rt)        = "\t" ++ "move " ++ rs ++ "," ++ rt ++ "\n"
   show (IRet rs)            = "\t" ++ "ret " ++ rs ++ "\n"
   show (ILabel l)           = l ++ ":" ++ "\n"
   show (IJump l)            = "\t" ++ "j " ++ l ++ "\n"
   show (IJal l)             = "\t" ++ "jal " ++ l ++ "\n"
   show (IJR r)              = "\t" ++ "jr " ++ r ++ "\n"
-  show (IPrint r)           = "\t" ++ "print " ++ r ++ "\n"
+  show IStore               = "\t" ++ "store" ++ "\n"
+  show IRestore             = "\t" ++ "restore" ++ "\n"
+  -- show (ISw rs rt n)        = "\t" ++ show rt ++ "\n"
+  show (ISw rs rt n)        = "\t" ++ "sw " ++ rs ++ "," ++ show n ++ "(" ++ rt ++ ")\n"
+  show (ILw rs rt n)        = "\t" ++ "lw " ++ rs ++ "," ++ show n ++ "(" ++ rt ++ ")\n"
+  show ISys                 = "\t" ++ "syscall" ++ "\n"
 
 
 exprToDeclareList :: Expr -> Either String [Declare]
@@ -93,10 +100,10 @@ exprToInstructionList' exp = case exp of
       return $ IOriZ s i : dl2
     EBinOp Plus (EVariable r1) (EVariable r2) -> do
       dl2 <- exprToInstructionList' e2
-      return $ IAdd r1 r2 s : dl2
+      return $ IAdd s r1 r2 : dl2
     EBinOp Mult (EVariable r1) (EVariable r2) -> do
       dl2 <- exprToInstructionList' e2
-      return $ IMul r1 r2 s : dl2
+      return $ IMul s r1 r2 : dl2
     EApp e3 e4 -> do
       dl2 <- exprToInstructionList' e2
       (f,as) <- appToFunAndArgs $ EApp e3 e4

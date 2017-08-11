@@ -45,10 +45,10 @@ allocate' (ist:ists) = case ist of
     r2' <- getRegisterName r2
     ists' <- allocate' ists
     return $ IMove r1' r2' : ists'
-  IPrint r1 -> do
-    r1' <- getRegisterName r1
-    ists' <- allocate' ists
-    return $ IPrint r1' : ists'
+  -- IPrint r1 -> do
+    -- r1' <- getRegisterName r1
+    -- ists' <- allocate' ists
+    -- return $ IPrint r1' : ists'
   _ -> do
     ists' <- allocate' ists
     return $ ist : ists'

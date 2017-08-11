@@ -7,10 +7,10 @@ import Data.Maybe
 
 processCall :: [Instruction] -> [Instruction]
 processCall (ILabel l:ists) = ILabel l:evalState (processCall' ists) Map.empty
-processCall ists = concat $ map replaceRetWithPrint (ILabel "main":ists)
+processCall ists = (concat $ map replaceRetWithPrint (ILabel "main":ists)) ++ [IOriZ "$v0" 10,ISys]
 
-replaceRetWithPrint (IRet r) = [IPrint r]
-replaceRetWithPrint (ICall f as rd) = setMove (zip argsReg as) ++ [IJal f,IMove rd "$v0"]
+replaceRetWithPrint (IRet r) = [IStore,IOriZ "$v0" 1,IMove "$a0" r,ISys,IRestore]
+replaceRetWithPrint (ICall f as rd) = IStore : setMove (zip argsReg as) ++ [IJal f,IRestore,IMove rd "$v0"]
 replaceRetWithPrint i        = [i]
 
 setArgs :: [String] -> State (Map.Map String String) ()
@@ -39,7 +39,7 @@ processCall' (ist:ists) = case ist of
     ists' <- processCall' ists
     return ists'
   ICall f as rd ->
-    return $ setMove (zip argsReg as) ++ [IJal f,IMove rd "$v0"]
+    return $ IStore : setMove (zip argsReg as) ++ [IJal f,IRestore,IMove rd "$v0"]
   IRet r -> do
     ists' <- processCall' ists
     return $ IMove "$v0" r : IJR "$ra" : ists'

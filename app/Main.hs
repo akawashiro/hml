@@ -10,6 +10,7 @@ import Flat
 import Declare
 import Call
 import RegisterAllocate
+import Stack
 
 main :: IO ()
 main = do
@@ -42,6 +43,12 @@ main = do
 
   let alloced = (liftM (liftM (liftM allocate))) called
   putStrLn $ "After allocation = \n" ++ show alloced
+
+  let stacked = (liftM $ liftM $ liftM processStack) alloced
+  putStrLn $ "stacked = \n" ++ show stacked
+
+  let regmap = (liftM $ liftM $ liftM istListToRegMap) alloced
+  putStrLn $ "regmap = \n" ++ show regmap
 
   let results = exprToExVal [] `liftM` flatted
   putStrLn "\nresults ="
