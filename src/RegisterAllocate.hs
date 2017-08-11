@@ -9,13 +9,16 @@ allocate :: [Instruction] -> [Instruction]
 allocate ists = evalState (allocate' ists) Map.empty
 
 getRegisterName :: String -> State (Map.Map String String) String
-getRegisterName r = do
-  m <- get
-  let s = Map.size m
-  let v = if head r == '$' then r else ("$t"++show s)
-  if Map.lookup r m == Nothing
-  then put (Map.insert r v m) >> (return v)
-  else return (fromJust (Map.lookup r m))
+getRegisterName r = 
+  if head r == '$' 
+  then return r
+  else do
+    m <- get
+    let s = Map.size m
+    let v = "$t"++show s
+    if Map.lookup r m == Nothing
+    then put (Map.insert r v m) >> (return v)
+    else return (fromJust (Map.lookup r m))
 
 allocate' :: [Instruction] -> State (Map.Map String String) [Instruction]
 allocate' [] = return []

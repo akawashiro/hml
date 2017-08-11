@@ -2,23 +2,55 @@ module Stack where
 
 import Declare
 import Control.Monad.State
+import Data.Maybe
 import qualified Data.Map as Map
 
 type RegMap = Map.Map String Int
 
-processStack :: [Instruction] -> [Instruction]
-processStack ists = processStoreRestore (appendStack ists) (istListToRegMap ists)
+numberOftReg = 10
 
-processStoreRestore [] _ = []
-processStoreRestore (ist:ists) regmap = case ist of
+processStack :: [Instruction] -> [Instruction]
+processStack ists = processSpilledReg (spilledRegMap ists) (processStoreRestore (normalRegMap ists) (appendStack ists))
+
+processSpilledReg :: RegMap -> [Instruction] -> [Instruction]
+processSpilledReg regmap [] = []
+processSpilledReg regmap (ist:ists) = case ist of
+  IAdd rd rs rt -> (lwrs rs) ++ (lwrt rt) ++ [IAdd (rd' rd) (rs' rs) (rt' rt)] ++ (swrd rd) ++ rest
+  IMul rd rs rt -> (lwrs rs) ++ (lwrt rt) ++ [IMul (rd' rd) (rs' rs) (rt' rt)] ++ (swrd rd) ++ rest
+  IBeqz rs f    -> (lwrs rs) ++ [IBeqz (rs' rs) f] ++ rest
+  IOriZ rd i    -> [IOriZ (rd' rd) i] ++ (swrd rd) ++ rest
+  IMove rd rs   -> (lwrs rs) ++ [IMove (rd' rd) (rs' rs)] ++ (swrd rd) ++ rest
+  IJR rs        -> (lwrs rs) ++ [IJR (rs' rs)] ++ rest
+  _ -> ist:rest
+  where rest = processSpilledReg regmap ists
+        swrd r = if Map.lookup r regmap == Nothing then [] else [ISw "$v0" "$sp" (fromJust $ Map.lookup r regmap)]
+        lwrs r = if Map.lookup r regmap == Nothing then [] else [ILw "$v0" "$sp" (fromJust $ Map.lookup r regmap)]
+        lwrt r = if Map.lookup r regmap == Nothing then [] else [ILw "$v1" "$sp" (fromJust $ Map.lookup r regmap)]
+        rd' r  = if Map.lookup r regmap == Nothing then r else "$v0"
+        rs' r  = if Map.lookup r regmap == Nothing then r else "$v0"
+        rt' r  = if Map.lookup r regmap == Nothing then r else "$v1"
+
+processStoreRestore :: RegMap -> [Instruction] -> [Instruction]
+processStoreRestore _ [] = []
+processStoreRestore regmap (ist:ists) = case ist of
   IStore -> map (\(r,o) -> ISw r "$sp" o) l ++ s
   IRestore -> map (\(r,o) -> ILw r "$sp" o) l ++ s
   _ -> ist : s
-  where s = processStoreRestore ists regmap
+  where s = processStoreRestore regmap ists 
         l = Map.toList regmap
 
 istListToRegMap :: [Instruction] -> RegMap
 istListToRegMap ists = execState (istListToRegMap' ists) Map.empty
+
+isSpilledReg :: String -> Bool
+isSpilledReg s = s!!1=='t' && read (drop 2 s) > numberOftReg-1
+
+spilledRegMap :: [Instruction] -> RegMap
+spilledRegMap ists = Map.fromList (filter (\(r,o) -> isSpilledReg r) (Map.toList (istListToRegMap ists)))
+
+
+normalRegMap :: [Instruction] -> RegMap
+normalRegMap ists = Map.fromList (filter (\(r,o) -> not (isSpilledReg r)) (Map.toList (istListToRegMap ists)))
 
 addRegToMap :: String -> State RegMap ()
 addRegToMap r = do
