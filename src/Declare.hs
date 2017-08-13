@@ -7,6 +7,7 @@ import Control.Monad.Trans.Either
 data Instruction = IInt Int
             | IAdd  String String String
             | IMul  String String String
+            | ISlt  String String String
             | IBeqz String String -- First operand is condition
             | IOriZ String Int
             | ICall String [String] String
@@ -20,17 +21,22 @@ data Instruction = IInt Int
             | ISw String String Int -- sw r1 r2 offset offset(r2) = r1
             | ILw String String Int -- lw r1 r2 offset r1 = offset(r2)
             | IStore
+            | ISysStore
             | IRestore
+            | ISysRestore
             | ISys
 
 type Declare = [Instruction]
 
 instance Show Instruction where
   show (IInt i)             = "\t" ++ show i ++ "\n"
-  show (IAdd rd rs rt)      = "\t" ++ "add " ++ rd ++ "," ++ rs ++ "," ++ rt ++ "\n"
+  show (IAdd rd rs rt)      = "\t" ++ "addu " ++ rd ++ "," ++ rs ++ "," ++ rt ++ "\n"
   show (IMul rd rs rt)      = "\t" ++ "mul " ++ rd ++ "," ++ rs ++ "," ++ rt ++ "\n"
+  show (ISlt rd rs rt)      = "\t" ++ "slt " ++ rd ++ "," ++ rs ++ "," ++ rt ++ "\n"
   show (IBeqz c l)          = "\t" ++ "beqz " ++ c ++ "," ++ l ++ "\n"
-  show (IOriZ r i)          = "\t" ++ "oriz " ++ r ++ ",$0," ++ show i ++ "\n"
+  -- show (IOriZ r i)          = if 0<= i then "\t" ++ "ori " ++ r ++ ",$0," ++ show i ++ "\n"
+                                       -- else "\t" ++ "ori " ++ r ++ ",$0," ++ show (65536+i) ++ "\n"
+  show (IOriZ r i)          = "\tli " ++ r ++ "," ++ show i ++ "\n"
   show (ICall f as rd)      = "\t" ++ rd ++ " = " ++ f ++ " " ++ show as ++ "\n"
   show (IArgs as)           = "\t" ++ "args " ++ show as ++ "\n"
   show (IMove rs rt)        = "\t" ++ "move " ++ rs ++ "," ++ rt ++ "\n"
@@ -41,7 +47,8 @@ instance Show Instruction where
   show (IJR r)              = "\t" ++ "jr " ++ r ++ "\n"
   show IStore               = "\t" ++ "store" ++ "\n"
   show IRestore             = "\t" ++ "restore" ++ "\n"
-  -- show (ISw rs rt n)        = "\t" ++ show rt ++ "\n"
+  show ISysStore               = "\t" ++ "sysstore" ++ "\n"
+  show ISysRestore             = "\t" ++ "sysrestore" ++ "\n"
   show (ISw rs rt n)        = "\t" ++ "sw " ++ rs ++ "," ++ show n ++ "(" ++ rt ++ ")\n"
   show (ILw rs rt n)        = "\t" ++ "lw " ++ rs ++ "," ++ show n ++ "(" ++ rt ++ ")\n"
   show ISys                 = "\t" ++ "syscall" ++ "\n"
@@ -86,9 +93,9 @@ exprToInstructionList' exp = case exp of
     EVariable s -> do
       l1 <- makeIfLabel
       l2 <- makeIfLabel
-      dl1 <- exprToInstructionList' e1
       dl2 <- exprToInstructionList' e2
-      return $ [IBeqz s l1] ++ dl1 ++ [IJump l2,ILabel l1] ++ dl2 ++ [ILabel l2]
+      dl3 <- exprToInstructionList' e3
+      return $ [IBeqz s l1] ++ [IJump l2,ILabel l1] ++ dl3 ++ [ILabel l2] ++ dl2
     EInt i -> do
       dl1 <- exprToInstructionList' e1
       dl2 <- exprToInstructionList' e2
@@ -104,6 +111,9 @@ exprToInstructionList' exp = case exp of
     EBinOp Mult (EVariable r1) (EVariable r2) -> do
       dl2 <- exprToInstructionList' e2
       return $ IMul s r1 r2 : dl2
+    EBinOp Lt (EVariable r1) (EVariable r2) -> do
+      dl2 <- exprToInstructionList' e2
+      return $ ISlt s r1 r2 : dl2
     EApp e3 e4 -> do
       dl2 <- exprToInstructionList' e2
       (f,as) <- appToFunAndArgs $ EApp e3 e4

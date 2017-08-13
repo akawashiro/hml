@@ -11,47 +11,49 @@ import Declare
 import Call
 import RegisterAllocate
 import Stack
+import Data.Either
+
+genCode :: [[Instruction]] -> String
+genCode is = "\t.data\nNL:\n\t.asciiz \"\\n\"\n\t.text\n\t.globl main\n" ++ (concat (map (concat.(map show)) is))
 
 main :: IO ()
 main = do
   input <- getContents
-  putStrLn $ "input = \n" ++ input ++ "\n"
+  -- putStrLn $ "input = \n" ++ input ++ "\n"
 
   let parsed = stringToExpr input
-  putStrLn $ "after parsing = \n" ++ show parsed ++ "\n"
+  -- putStrLn $ "after parsing = \n" ++ show parsed ++ "\n"
 
   let alphad = exprToAlphaExpr `liftM` parsed
-  putStrLn $ "after alpha conversion = \n" ++ show alphad ++ "\n"
+  -- putStrLn $ "after alpha conversion = \n" ++ show alphad ++ "\n"
 
   let closured = exprToClosureExpr `liftM` alphad
-  putStrLn $ "after closure translation = \n" ++ show closured ++ "\n"
+  -- putStrLn $ "after closure translation = \n" ++ show closured ++ "\n"
 
   let knormaled = exprToKNormalExpr `liftM` closured
-  putStrLn $ "after KNormal = \n" ++ show knormaled ++ "\n"
+  -- putStrLn $ "after KNormal = \n" ++ show knormaled ++ "\n"
 
   let flatted = exprToFlatExpr `liftM` knormaled
-  putStrLn $ "after flatting = \n" ++ show flatted ++ "\n"
+  -- putStrLn $ "after flatting = \n" ++ show flatted ++ "\n"
 
   let ists = exprToInstructionList `liftM` flatted
-  putStrLn $ "Instructions = \n" ++ show ists
+  -- putStrLn $ "Instructions = \n" ++ show ists
 
   let ists' = exprToDeclareList `liftM` flatted
-  putStrLn $ "Declares = \n" ++ show ists'
+  -- putStrLn $ "Declares = \n" ++ show ists'
 
   let called = (liftM (liftM (liftM processCall))) ists'
-  putStrLn $ "After call normalization = \n" ++ show called
+  -- putStrLn $ "After call normalization = \n" ++ show called
 
   let alloced = (liftM (liftM (liftM allocate))) called
-  putStrLn $ "After allocation = \n" ++ show alloced
+  -- putStrLn $ "After allocation = \n" ++ show alloced
 
   let stacked = (liftM $ liftM $ liftM processStack) alloced
-  putStrLn $ "stacked = \n" ++ show stacked
+  -- putStrLn $ "stacked = \n" ++ show stacked
 
-  let regmap = (liftM $ liftM $ liftM istListToRegMap) alloced
-  putStrLn $ "regmap = \n" ++ show regmap
+  -- let results = exprToExVal [] `liftM` flatted
+  -- putStrLn "\nresults ="
+  -- print results
 
-  let results = exprToExVal [] `liftM` flatted
-  putStrLn "\nresults ="
-  print results
-
-
+  putStr (genCode (e (e stacked)))
+  where e (Right x) = x

@@ -35,6 +35,12 @@ allocate' (ist:ists) = case ist of
     r3' <- getRegisterName r3
     ists' <- allocate' ists
     return $ IMul r1' r2' r3' : ists'
+  ISlt r1 r2 r3 -> do
+    r1' <- getRegisterName r1
+    r2' <- getRegisterName r2
+    r3' <- getRegisterName r3
+    ists' <- allocate' ists
+    return $ ISlt r1' r2' r3' : ists'
   IBeqz r1 f -> do
     r1' <- getRegisterName r1
     ists' <- allocate' ists

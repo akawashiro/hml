@@ -9,7 +9,7 @@ processCall :: [Instruction] -> [Instruction]
 processCall (ILabel l:ists) = ILabel l:evalState (processCall' ists) Map.empty
 processCall ists = (concat $ map replaceRetWithPrint (ILabel "main":ists)) ++ [IOriZ "$v0" 10,ISys]
 
-replaceRetWithPrint (IRet r) = [IStore,IOriZ "$v0" 1,IMove "$a0" r,ISys,IRestore]
+replaceRetWithPrint (IRet r) = [ISysStore,IMove "$a0" r,IOriZ "$v0" 1,ISys,ISysRestore]
 replaceRetWithPrint (ICall f as rd) = IStore : setMove (zip argsReg as) ++ [IJal f,IRestore,IMove rd "$v0"]
 replaceRetWithPrint i        = [i]
 
@@ -38,8 +38,9 @@ processCall' (ist:ists) = case ist of
     setArgs as
     ists' <- processCall' ists
     return ists'
-  ICall f as rd ->
-    return $ IStore : setMove (zip argsReg as) ++ [IJal f,IRestore,IMove rd "$v0"]
+  ICall f as rd -> do
+    ists' <- processCall' ists
+    return $ IStore : setMove (zip argsReg as) ++ [IJal f,IRestore,IMove rd "$v0"] ++ ists'
   IRet r -> do
     ists' <- processCall' ists
     return $ IMove "$v0" r : IJR "$ra" : ists'
@@ -55,6 +56,12 @@ processCall' (ist:ists) = case ist of
     r3' <- replaceRegister r3
     ists' <- processCall' ists
     return $ IMul r1' r2' r3' : ists'
+  ISlt r1 r2 r3 -> do
+    r1' <- replaceRegister r1
+    r2' <- replaceRegister r2
+    r3' <- replaceRegister r3
+    ists' <- processCall' ists
+    return $ ISlt r1' r2' r3' : ists'
   IBeqz r1 f -> do
     r1' <- replaceRegister r1
     ists' <- processCall' ists
@@ -71,4 +78,6 @@ processCall' (ist:ists) = case ist of
   IJump l -> do
     ists' <- processCall' ists
     return $ IJump l : ists'
-
+  _ -> do
+    ists' <- processCall' ists
+    return $ ist:ists'

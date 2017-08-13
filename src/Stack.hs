@@ -34,7 +34,9 @@ processStoreRestore :: RegMap -> [Instruction] -> [Instruction]
 processStoreRestore _ [] = []
 processStoreRestore regmap (ist:ists) = case ist of
   IStore -> map (\(r,o) -> ISw r "$sp" o) l ++ s
+  ISysStore -> (ISw "$a0" "$sp" (fromJust (Map.lookup "$a0" regmap))) : s
   IRestore -> map (\(r,o) -> ILw r "$sp" o) l ++ s
+  ISysRestore -> (ILw "$a0" "$sp" (fromJust (Map.lookup "$a0" regmap))) : s
   _ -> ist : s
   where s = processStoreRestore regmap ists 
         l = Map.toList regmap
@@ -56,7 +58,7 @@ addRegToMap :: String -> State RegMap ()
 addRegToMap r = do
   m <- get
   if Map.lookup r m == Nothing && take 2 r /= "$v"
-  then put (Map.insert r ((Map.size m)*4) m) >> return ()
+  then put (Map.insert r ((Map.size m)*(4)) m) >> return ()
   else put m >> return ()
 
 istListToRegMap' :: [Instruction] -> State (Map.Map String Int) ()
@@ -71,7 +73,10 @@ istListToRegMap' (ist:ists) = case ist of
   where r = istListToRegMap' ists
 istListToRegMap' [] = return ()
 
-appendStack ists = head ists' : [IOriZ "$t0" s,IAdd "$sp" "$sp" "$t0"] ++ (tail ists')
+appendStack ists = head ists' : [IOriZ "$t0" (-1*s),IAdd "$sp" "$sp" "$t0"] ++ (tail ists')
   where s = Map.size (istListToRegMap ists) * 4
-        ists' = reverse ((head (reverse ists)) : [IAdd "$sp" "$sp" "$t0",IOriZ "$t0" (-1*s)] ++ (tail (reverse ists)))
+        -- ists' = reverse ((head (reverse ists)) : [IAdd "$sp" "$sp" "$t0",IOriZ "$t0" s] ++ (tail (reverse ists)))
+        f (IJR r) = [IOriZ "$t0" s,IAdd "$sp" "$sp" "$t0",IJR r]
+        f i@_ = [i]
+        ists' = concat (map f ists)
 
