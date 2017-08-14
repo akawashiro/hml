@@ -20,6 +20,7 @@ library
                      , containers
                      , transformers
                      , either
+                     , optparse-declarative
   default-language:    Haskell2010
 
 executable hml-exe
@@ -28,11 +29,13 @@ executable hml-exe
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , hml
+                     , optparse-declarative
+                     , mtl
   default-language:    Haskell2010
 
 test-suite hml-test
   type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
+  -- hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
                      , hml
