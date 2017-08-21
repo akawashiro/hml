@@ -39,8 +39,9 @@ processCall' (ist:ists) = case ist of
     ists' <- processCall' ists
     return ists'
   ICall f as rd -> do
+    as' <- mapM replaceRegister as
     ists' <- processCall' ists
-    return $ IStore : setMove (zip argsReg as) ++ [IJal f,IRestore,IMove rd "$v0"] ++ ists'
+    return $ IStore : setMove (zip argsReg as') ++ [IJal f,IRestore,IMove rd "$v0"] ++ ists'
   IRet r -> do
     ists' <- processCall' ists
     return $ IMove "$v0" r : IJR "$ra" : ists'

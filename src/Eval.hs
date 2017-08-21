@@ -22,7 +22,6 @@ exprToExVal env (EVariable s) =
   if isNothing (lookup s env)
   then Left "Cannot lookup variable."
   else Right (fromJust (lookup s env))
-  -- maybe (Left "Cannot lookup variable.") (Right (lookup s env))
 exprToExVal env (ELet s e1 e2) = do
   v <- exprToExVal env e1
   exprToExVal ((s,v):env) e2

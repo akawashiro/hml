@@ -47,8 +47,11 @@ appToNumberOfAppliedArgs :: Expr -> Int
 appToNumberOfAppliedArgs EVariable s = 0
 appToNumberOfAppliedArgs EApp e1 e2 = 1 + appToNumberOfAppliedArgs e1
 
-exprToEtaLongExpr :: Expr -> S Expr
-exprToEtaLongExpr exp = case exp of
+exprToEtaLongExpr :: Expr -> Expr
+exprToEtaLongExpr exp = runState
+
+exprToEtaLongExpr' :: Expr -> S Expr
+exprToEtaLongExpr' exp = case exp of
   ELetRec s1 s2 e1 e2 -> do
     putNumberOfArgs exp
     return exp

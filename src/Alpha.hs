@@ -16,15 +16,15 @@ exprToAlphaExpr exp = evalState (exprToAlphaExpr' exp) (Map.empty,0)
 
 type NameState = (Map.Map String String, Int)
 
-addNewName :: String -> State NameState ()
-addNewName s = do
+addNewName :: String -> String -> State NameState ()
+addNewName prefix s = do
   (m,i) <- get
-  unless (Map.member s m) $ put (Map.insert s (s ++ "_" ++ show i) m , i+1)
+  unless (Map.member s m) $ put (Map.insert s (prefix ++ s ++ "_" ++ show i) m , i+1)
 
 rename :: String -> State NameState String
 rename s = do
   (m,_) <- get
-  return $ fromJust $ Map.lookup s m
+  return $ maybe ("Cannot find name of " ++ show s) id (Map.lookup s m)
 
 exprToAlphaExpr' :: Expr -> State NameState Expr 
 exprToAlphaExpr' exp = case exp of
@@ -39,20 +39,22 @@ exprToAlphaExpr' exp = case exp of
     e2' <- exprToAlphaExpr' e2
     e3' <- exprToAlphaExpr' e3
     return $ EIf e1' e2' e3'
+  ELet s1 (EFun s2 e1) e2 -> do
+    addNewName "fun_" s1
+    s1' <- rename s1
+    e2' <- exprToAlphaExpr' e2
+    addNewName "val_" s2
+    s2' <- rename s2
+    e1' <- exprToAlphaExpr' e1
+    return $ ELetRec s1' s2' e1' e2'
   ELet s e1 e2 -> do
-    addNewName s
+    addNewName "val_" s
+    s' <- rename s
     e1' <- exprToAlphaExpr' e1
     e2' <- exprToAlphaExpr' e2
-    s' <- rename s
-    case e1' of
-      EFun s'' e1'' -> do
-        addNewName s''
-        e1''' <- exprToAlphaExpr' e1''
-        s''' <- rename s''
-        return $ ELetRec s' s''' e1''' e2'
-      _ -> return $ ELet s' e1' e2'
+    return $ ELet s' e1' e2'
   EFun s e -> do
-    addNewName s
+    addNewName "val_" s
     s' <- rename s
     e' <- exprToAlphaExpr' e
     return $ EFun s' e'
@@ -61,10 +63,10 @@ exprToAlphaExpr' exp = case exp of
     e2' <- exprToAlphaExpr' e2
     return $ EApp e1' e2'
   ELetRec s1 s2 e1 e2 -> do
-    addNewName s1
+    addNewName "fun_" s1
     s1' <- rename s1
     e2' <- exprToAlphaExpr' e2
-    addNewName s2
+    addNewName "val_" s2
     s2' <- rename s2
     e1' <- exprToAlphaExpr' e1
     return $ ELetRec s1' s2' e1' e2'

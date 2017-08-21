@@ -4,7 +4,7 @@ module Main where
 import Control.Monad.Trans
 import Options.Declarative
 import Parse
-import Eval
+-- import Eval
 import Control.Monad
 import Alpha
 import KNormal
