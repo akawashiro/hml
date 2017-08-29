@@ -1,4 +1,4 @@
-module RegisterAllocate where
+module Register where
 
 import Declare
 import Control.Monad.State
@@ -33,6 +33,26 @@ firstFreeRegister (r:rs) set = if Set.member (fst r) set || (snd r !! 1 /= 't')
                                then firstFreeRegister rs set
                                else Just (snd r)
 
+followingInstruction :: [Instruction] -> [Instruction]
+followingInstruction ists = evalState (followingInstruction' ists) Set.empty
+
+type LabelSet = Set.Set String
+followingInstruction' :: [Instruction] -> State LabelSet [Instruction]
+followingInstruction' [] = return []
+followingInstruction' (i:ists) = case i of
+  ILabel l -> do
+    s <- get
+    ists' <- followingInstruction' ists
+    if Set.member l s then return (i:ists') else return []
+  IJump l -> do
+    s <- get
+    put $ Set.insert l s
+    ists' <- followingInstruction' (tail ists)
+    return $ (i:head ists:ists')
+  _ -> do
+    ists' <- followingInstruction' ists
+    return $ i : ists'
+
 usingRegister :: [Instruction] -> Set.Set String
 usingRegister [] = Set.empty
 usingRegister  (ist:ists) = case ist of
@@ -50,36 +70,37 @@ allocate' :: [Instruction] -> State (Map.Map String String,Int) [Instruction]
 allocate' [] = return []
 allocate' (ist:ists) = case ist of
   IAdd r1 r2 r3 -> do
-    r1' <- getRegisterName r1 (ist:ists)
-    r2' <- getRegisterName r2 (ist:ists)
-    r3' <- getRegisterName r3 (ist:ists)
+    r1' <- getRegisterName r1 fists
+    r2' <- getRegisterName r2 fists
+    r3' <- getRegisterName r3 fists
     ists' <- allocate' ists
     return $ IAdd r1' r2' r3' : ists'
   IMul r1 r2 r3 -> do
-    r1' <- getRegisterName r1 (ist:ists)
-    r2' <- getRegisterName r2 (ist:ists)
-    r3' <- getRegisterName r3 (ist:ists)
+    r1' <- getRegisterName r1 fists
+    r2' <- getRegisterName r2 fists
+    r3' <- getRegisterName r3 fists
     ists' <- allocate' ists
     return $ IMul r1' r2' r3' : ists'
   ISlt r1 r2 r3 -> do
-    r1' <- getRegisterName r1 (ist:ists)
-    r2' <- getRegisterName r2 (ist:ists)
-    r3' <- getRegisterName r3 (ist:ists)
+    r1' <- getRegisterName r1 fists
+    r2' <- getRegisterName r2 fists
+    r3' <- getRegisterName r3 fists
     ists' <- allocate' ists
     return $ ISlt r1' r2' r3' : ists'
   IBeqz r1 f -> do
-    r1' <- getRegisterName r1 (ist:ists)
+    r1' <- getRegisterName r1 fists
     ists' <- allocate' ists
     return $ IBeqz r1' f : ists'
   IOriZ r1 v -> do
-    r1' <- getRegisterName r1 (ist:ists)
+    r1' <- getRegisterName r1 fists
     ists' <- allocate' ists
     return $ IOriZ r1' v : ists'
   IMove r1 r2 -> do
-    r1' <- getRegisterName r1 (ist:ists)
-    r2' <- getRegisterName r2 (ist:ists)
+    r1' <- getRegisterName r1 fists
+    r2' <- getRegisterName r2 fists
     ists' <- allocate' ists
     return $ IMove r1' r2' : ists'
   _ -> do
     ists' <- allocate' ists
     return $ ist : ists'
+  where fists = followingInstruction (ist:ists)

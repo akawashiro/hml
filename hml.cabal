@@ -13,7 +13,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib, Parse, Alpha, KNormal, Closure, Flat, Declare, Call, RegisterAllocate, Stack, EtaLong
+  exposed-modules:     Lib, Parse, Alpha, KNormal, Closure, Flat, Declare, Call, Register, Stack, EtaLong
   build-depends:       base >= 4.7 && < 5
                      , parsec
                      , mtl

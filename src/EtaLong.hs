@@ -36,8 +36,8 @@ numberOfArgs (EFun s e) = 1 + numberOfArgs e
 numberOfArgs _ = 0
 
 appToEtaLongApp :: Expr -> Int -> S Expr
--- appToEtaLongApp exp (-1) = return exp
--- appToEtaLongApp exp (-2) = return exp
+appToEtaLongApp exp (-1) = return exp
+appToEtaLongApp exp (-2) = return exp
 appToEtaLongApp exp 0 = return exp
 appToEtaLongApp exp n = do
   a <- getFreshArgName
@@ -80,4 +80,10 @@ exprToEtaLongExpr' exp = case exp of
   EFun s e -> do
     e' <- exprToEtaLongExpr' e
     return $ EFun s e'
+  EIf e1 e2 e3 -> do
+    e1' <- exprToEtaLongExpr' e1
+    e2' <- exprToEtaLongExpr' e2
+    e3' <- exprToEtaLongExpr' e3
+    return $ EIf e1' e2' e3'
+  EInt i -> return exp
   -- _ -> exprToEtaLongExpr' exp

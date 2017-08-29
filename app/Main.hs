@@ -13,7 +13,7 @@ import Closure
 import Flat
 import Declare
 import Call
-import RegisterAllocate
+import Register
 import Stack
 import Data.Either
 

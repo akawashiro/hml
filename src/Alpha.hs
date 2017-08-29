@@ -26,6 +26,13 @@ rename s = do
   (m,_) <- get
   return $ maybe ("Cannot find name of " ++ show s) id (Map.lookup s m)
 
+isFun :: Expr -> Bool
+isFun exp = case exp of
+  EFun _ _ -> True
+  ELetRec _ _ _ _ -> True
+  ELet _ _ e -> isFun e
+  _ -> False
+
 exprToAlphaExpr' :: Expr -> State NameState Expr 
 exprToAlphaExpr' exp = case exp of
   EInt i -> return $ EInt i

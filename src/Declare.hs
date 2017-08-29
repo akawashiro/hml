@@ -79,7 +79,7 @@ appToFunAndArgs (EVariable s) = return (s,[])
 appToFunAndArgs (EApp e (EVariable s)) = do
   (f,as) <- appToFunAndArgs e
   return (f,s:as)
-appToFunAndArgs _ = left "Application expression is not inappropriate."
+appToFunAndArgs exp = left $ "Application expression is not inappropriate. \n exp = " ++ show exp
 
 -- funToArgsAndBody :: Expr -> EitherT String (State Int) ([String],Expr)
 funToArgsAndBody (EFun s e) = do

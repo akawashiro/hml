@@ -9,7 +9,7 @@ processCall :: [Instruction] -> [Instruction]
 processCall (ILabel l:ists) = ILabel l:evalState (processCall' ists) Map.empty
 processCall ists = (concat $ map replaceRetWithPrint (ILabel "main":ists)) ++ [IOriZ "$v0" 10,ISys]
 
-replaceRetWithPrint (IRet r) = [ISysStore,IMove "$a0" r,IOriZ "$v0" 1,ISys,ISysRestore]
+replaceRetWithPrint (IRet r) = [ISysStore,IMove "$a0" r,IOriZ "$v0" 1,ISys,ISysRestore,IOriZ "$v0" 10,ISys]
 replaceRetWithPrint (ICall f as rd) = IStore : setMove (zip argsReg as) ++ [IJal f,IRestore,IMove rd "$v0"]
 replaceRetWithPrint i        = [i]
 
