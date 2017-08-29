@@ -7,19 +7,24 @@ import qualified Data.Set as Set
 import Data.Maybe
 
 allocate :: [Instruction] -> [Instruction]
-allocate ists = evalState (allocate' ists) (Map.empty,0)
+allocate ists = evalState (allocate' ists) Map.empty
 
-getRegisterName :: String -> [Instruction] -> State (Map.Map String String,Int) String
+type RegMap = Map.Map String String
+
+getRegisterName :: String -> [Instruction] -> State RegMap String
 getRegisterName r ists =
   if head r == '$'
-  then return r
+  then do
+    m <- get
+    put (Map.insert "dummy" r m)
+    return r
   else do
-    (m,i) <- get
+    m <- get
     let fr = firstFreeRegister (Map.toList m) (usingRegister ists)
-    let v = head $ filter (\x -> not $ Set.member x (usingRegister ists)) (map (\x -> "$t" ++ show x) [0..100])
+    let v = head $ filter (\x -> not $ Set.member x (Set.fromList $ Map.elems m)) (map (\x -> "$t" ++ show x) [0..100])
     maybe (maybe 
-              (put (Map.insert r v m,i+1) >> return v)
-              (\x -> put (Map.insert r x (deleteAtValue x m),i) >> return x) 
+              (put (Map.insert r v m) >> return v)
+              (\x -> put (Map.insert r x (deleteAtValue x m)) >> return x) 
               fr)
           (\x -> return x) 
           (Map.lookup r m)
@@ -67,7 +72,7 @@ usingRegister  (ist:ists) = case ist of
   where rest = usingRegister ists
         f x y = Set.insert y x
 
-allocate' :: [Instruction] -> State (Map.Map String String,Int) [Instruction]
+allocate' :: [Instruction] -> State RegMap [Instruction]
 allocate' [] = return []
 allocate' (ist:ists) = case ist of
   IAdd r1 r2 r3 -> do
