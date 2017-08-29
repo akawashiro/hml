@@ -33,12 +33,7 @@ inputToInst input = do
   let alloced = (liftM (liftM (liftM allocate))) called
   let stacked = (liftM $ liftM $ liftM processStack) alloced
   putStr $ genCode $ e $ e $ stacked
-
-  -- putStr $ genCode $ e $ e $ (liftM $ liftM $ liftM processStack) $ 
-  -- (liftM (liftM (liftM allocate))) $ (liftM (liftM (liftM processCall))) 
-  -- exprToDeclareList `liftM` exprToFlatExpr `liftM` exprToKNormalExpr `liftM` 
-  -- exprToClosureExpr `liftM` exprToAlphaExpr `liftM` exprToEtaLongExpr `liftM` (stringToExpr input)
-  where e (Right x) = x
+  where e (Right x) = x -- This function is not total. So when the compile was failed, this program cause exception.
 
 showDetails :: String -> IO ()
 showDetails input = do
@@ -49,6 +44,8 @@ showDetails input = do
 
   let etad = exprToEtaLongExpr `liftM` parsed
   putStrLn $ "After eta expansion = \n" ++ show etad ++ "\n"
+
+  putStr $ "etamap = \n" ++ (show $ exprToEtaLongMap `liftM` parsed)
 
   let alphad = exprToAlphaExpr `liftM` etad
   putStrLn $ "After alpha conversion = \n" ++ show alphad ++ "\n"

@@ -55,6 +55,8 @@ appToNumberOfAppliedArgs (EApp e1 e2) = 1 + appToNumberOfAppliedArgs e1
 exprToEtaLongExpr :: Expr -> Expr
 exprToEtaLongExpr exp = evalState (exprToEtaLongExpr' exp) (Map.empty,0)
 
+exprToEtaLongMap exp = execState (exprToEtaLongExpr' exp) (Map.empty,0)
+
 exprToEtaLongExpr' :: Expr -> S Expr
 exprToEtaLongExpr' exp = case exp of
   ELetRec s1 s2 e1 e2 -> do
@@ -65,8 +67,10 @@ exprToEtaLongExpr' exp = case exp of
   EApp e1 e2 -> do
     (m,_) <- get
     let fn = appToFunName exp
-    let na = maybe 4 id (Map.lookup fn m)
-    appToEtaLongApp exp (na - appToNumberOfAppliedArgs exp)
+    maybe (return exp) (\na -> appToEtaLongApp exp (na - appToNumberOfAppliedArgs exp)) (Map.lookup fn m)
+    -- let na = maybe 100 id (Map.lookup fn m)
+    -- let na = fromJust (Map.lookup fn m)
+    -- appToEtaLongApp exp (na - appToNumberOfAppliedArgs exp)
   ELet s1 e1 e2 -> do
     e1' <- exprToEtaLongExpr' e1
     putNumberOfArgs (ELet s1 e1' e2)

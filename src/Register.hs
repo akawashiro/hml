@@ -16,7 +16,7 @@ getRegisterName r ists =
   else do
     (m,i) <- get
     let fr = firstFreeRegister (Map.toList m) (usingRegister ists)
-    let v = "$t" ++ show i
+    let v = head $ filter (\x -> Set.member x (usingRegister ists)) (map (\x -> "$t" ++ show x) [0..])
     maybe (maybe 
               (put (Map.insert r v m,i+1) >> return v)
               (\x -> put (Map.insert r x (deleteAtValue x m),i) >> return x) 
@@ -62,6 +62,7 @@ usingRegister  (ist:ists) = case ist of
   IOriZ r1 v ->    foldl f rest [r1]
   IMove r1 r2 ->   foldl f rest [r1,r2]
   IBeqz r1 l ->    foldl f rest [r1]
+  IJalr rs rt ->   foldl f rest [rs,rt]
   _ -> rest
   where rest = usingRegister ists
         f x y = Set.insert y x
@@ -100,6 +101,11 @@ allocate' (ist:ists) = case ist of
     r2' <- getRegisterName r2 fists
     ists' <- allocate' ists
     return $ IMove r1' r2' : ists'
+  IJalr rs rt -> do
+    rs' <- getRegisterName rs fists
+    rt' <- getRegisterName rt fists
+    ists' <- allocate' ists
+    return $ IJalr rs' rt' : ists'
   _ -> do
     ists' <- allocate' ists
     return $ ist : ists'
