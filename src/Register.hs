@@ -16,7 +16,7 @@ getRegisterName r ists =
   else do
     (m,i) <- get
     let fr = firstFreeRegister (Map.toList m) (usingRegister ists)
-    let v = head $ filter (\x -> Set.member x (usingRegister ists)) (map (\x -> "$t" ++ show x) [0..])
+    let v = head $ filter (\x -> not $ Set.member x (usingRegister ists)) (map (\x -> "$t" ++ show x) [0..100])
     maybe (maybe 
               (put (Map.insert r v m,i+1) >> return v)
               (\x -> put (Map.insert r x (deleteAtValue x m),i) >> return x) 

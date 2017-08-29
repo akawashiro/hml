@@ -20,14 +20,15 @@ fun_g_1:
 	move $t0,$a0
 	move $t1,$a1
 	li $t1,1
+	li $t1,2
 	sw $a0,4($sp)
 	sw $a1,12($sp)
 	sw $ra,16($sp)
 	sw $t0,0($sp)
 	sw $t1,8($sp)
-	move $a0,$t0
+	move $a0,$t1
 	move $a1,$t1
-	jal fun_f_0
+	jalr $t0,$ra
 	lw $a0,4($sp)
 	lw $a1,12($sp)
 	lw $ra,16($sp)
@@ -41,10 +42,9 @@ fun_g_1:
 main:
 	li $t0,-8
 	addu $sp,$sp,$t0
-	li $t0,10
 	sw $a0,4($sp)
 	sw $t0,0($sp)
-	move $a0,$t0
+	la $a0,fun_f_0
 	jal fun_g_1
 	lw $a0,4($sp)
 	lw $t0,0($sp)
