@@ -17,7 +17,8 @@ data Instruction = IInt Int
             | ILabel String
             | IJump String
             | IJal String
-            | IJR   String
+            | IJR   String -- Jump Register
+            | IJalr String String -- jalr Rs, Rd  Rd = 次命令; goto Rs
             | ISw String String Int -- sw r1 r2 offset offset(r2) = r1
             | ILw String String Int -- lw r1 r2 offset r1 = offset(r2)
             | IStore
@@ -25,6 +26,7 @@ data Instruction = IInt Int
             | IRestore
             | ISysRestore
             | ISys
+            | ILa String String -- ILa Rdest, address Rdest = address
 
 type Declare = [Instruction]
 
@@ -44,6 +46,7 @@ instance Show Instruction where
   show (ILabel l)           = l ++ ":" ++ "\n"
   show (IJump l)            = "\t" ++ "j " ++ l ++ "\n"
   show (IJal l)             = "\t" ++ "jal " ++ l ++ "\n"
+  show (IJalr rs rt)             = "\t" ++ "jalr " ++ rs ++ "," ++ rt ++ "\n"
   show (IJR r)              = "\t" ++ "jr " ++ r ++ "\n"
   show IStore               = "\t" ++ "store" ++ "\n"
   show IRestore             = "\t" ++ "restore" ++ "\n"
@@ -51,6 +54,7 @@ instance Show Instruction where
   show ISysRestore             = "\t" ++ "sysrestore" ++ "\n"
   show (ISw rs rt n)        = "\t" ++ "sw " ++ rs ++ "," ++ show n ++ "(" ++ rt ++ ")\n"
   show (ILw rs rt n)        = "\t" ++ "lw " ++ rs ++ "," ++ show n ++ "(" ++ rt ++ ")\n"
+  show (ILa rd label)        = "\t" ++ "la " ++ rd ++ "," ++ label ++ "\n"
   show ISys                 = "\t" ++ "syscall" ++ "\n"
 
 
@@ -79,7 +83,7 @@ appToFunAndArgs (EVariable s) = return (s,[])
 appToFunAndArgs (EApp e (EVariable s)) = do
   (f,as) <- appToFunAndArgs e
   return (f,s:as)
-appToFunAndArgs _ = left "Application expression is not inappropriate."
+appToFunAndArgs exp = left $ "Application expression is not inappropriate. \n exp = " ++ show exp
 
 -- funToArgsAndBody :: Expr -> EitherT String (State Int) ([String],Expr)
 funToArgsAndBody (EFun s e) = do

@@ -13,7 +13,7 @@ exprToFreeVariables :: Expr -> [String] -> [String]
 exprToFreeVariables exp boundedVariables = case exp of
   EInt i -> []
   EBool b -> []
-  EVariable v -> if v `elem` boundedVariables then [] else [v]
+  EVariable v -> if v `elem` boundedVariables || take 3 v == "fun" then [] else [v]
   EBinOp o e1 e2 ->
     let v1 = exprToFreeVariables e1 boundedVariables in
     let v2 = exprToFreeVariables e2 boundedVariables in
