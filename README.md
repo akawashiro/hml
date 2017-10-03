@@ -16,7 +16,7 @@ arith.mlをコンパイルして結果をarith.asmに保存する例です
 ```shell
 stack exec hml-exe -- arith.ml > arith.asm
 ```
-spim<pages.cs.wisc.edu/~larus/spim.html>を使うとアセンブラの実行結果を確認できます
+spim(<https://pages.cs.wisc.edu/~larus/spim.html>)を使うとアセンブラの実行結果を確認できます
 ```shell
 spim -file arith.asm
 ```
