@@ -1,3 +1,13 @@
+# TODO
+```OCaml
+let f = let x = 10 in fun y -> x + y in f 3;;
+```
+のようなケースでバグる．
+```OCaml
+let x = 10 in let f = fun y -> x + y in f 3;;
+に変換する必要がある．
+```
+
 # hml
 ML風の関数型言語をMIPSアセンブラに変換するコンパイラです  
 プログラムの大部分はMiniML(<http://esumii.github.io/min-caml/>)を参考にしています  
