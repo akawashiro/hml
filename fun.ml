@@ -1,3 +1,3 @@
-let rec f = fun x ->
+let rec f x =
     x + 10
 in f 10;;
