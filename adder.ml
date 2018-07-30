@@ -1,1 +1,4 @@
-let rec adder x y = x + y in (adder 10);;
+let rec make_adder x =
+  let rec adder y = x + y in
+  adder in
+(make_adder 3) 7

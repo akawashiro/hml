@@ -1,11 +1,8 @@
 module Flat where
 
-import Parse
+import KNormal (Exp(..), Var(..))
 
--- programToFlatProgram :: Program -> Program
--- programToFlatProgram = map exprToFlatExpr
-
-exprToFlatExpr :: Expr -> Expr
+exprToFlatExpr :: Exp -> Exp
 exprToFlatExpr exp =
   exprToLecFlat $ (exprToPrefixLetRec exp) (exprToSuffixLetRec exp)
 

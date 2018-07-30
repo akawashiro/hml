@@ -15,9 +15,16 @@ import qualified Text.ParserCombinators.Parsec.Token    as P
 stringToExp :: String -> Either String Exp
 stringToExp input = either (\x->Left $show x) (\x->Right x) (parse parseExp "Parse.hs" input)
 
-newtype Var = Var String deriving (Show)
+newtype Var = Var String
+instance Show Var where
+  show (Var s) = s
 
-data Op = OLess | OPlus | OMinus | OTimes deriving (Show)
+data Op = OLess | OPlus | OMinus | OTimes
+instance Show Op where
+  show OLess = "<"
+  show OPlus = "+"
+  show OMinus = "-"
+  show OTimes = "*"
 
 data Exp = EInt Integer | 
            EBool Bool |
@@ -27,13 +34,21 @@ data Exp = EInt Integer |
            EVar Var |
            ERec Var [Var] Exp Exp |
            EApp Exp [Exp]
-           deriving (Show)
+instance Show Exp where
+  show (EInt i) = show i
+  show (EBool b) = show b
+  show (EIf e1 e2 e3) = "if " ++ show e1 ++ "\nthen " ++ show e2 ++ "\nelse " ++ show e3
+  show (EOp o e1 e2) = "(" ++ show o ++ " " ++ show e1 ++ " " ++ show e2 ++ ")"
+  show (ELet v e1 e2) = "let " ++ show v ++ " = " ++ show e1 ++ " in\n" ++ show e2
+  show (EVar v) = show v
+  show (ERec x ys e1 e2) = "let rec " ++ show x ++ " " ++ show ys ++ " = " ++ show e1 ++ " in\n" ++ show e2
+  show (EApp e1 e2s) = show e1 ++ " " ++ show e2s
 
 natDef :: P.GenLanguageDef String () Identity
 natDef = emptyDef { P.reservedNames = keywords, P.reservedOpNames = operators }
 
 keywords :: [String]
-keywords = [ "let", "rec", "in", "true", "false", "evalto", "if", "then", "else", "fun"]
+keywords = [ "let", "rec", "in", "true", "false", "if", "then", "else", "fun"]
 
 operators = [ "=", "->", "+", "-", "*", "<"]
 

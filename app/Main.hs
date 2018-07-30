@@ -5,11 +5,11 @@ import Control.Monad.Trans
 import Options.Declarative
 import Parse
 -- import EtaLong
--- import Control.Monad
--- import Alpha
--- import KNormal
+import Control.Monad
+import Alpha
+import KNormal
 -- import Closure
--- import Flat
+import Flat
 -- import Declare
 -- import Call
 -- import Register
@@ -39,26 +39,29 @@ showDetails input = do
   putStr $ "Input = \n" ++ input ++ "\n"
 
   let parsed = stringToExp input
-  putStr $ "After parsing = \n" ++ show parsed ++ "\n\n"
+  putStr $ "After parsing = \n" ++ f parsed ++ "\n\n"
+
+  let knormaled = (liftM exprToKNormalExpr) parsed
+  putStrLn $ "After KNormalization = \n" ++ f knormaled ++ "\n"
+
+  let alphad = exprToAlphaExpr `liftM` knormaled
+  putStrLn $ "After alpha conversion = \n" ++ f alphad ++ "\n"
+
+  let flatted = exprToFlatExpr `liftM` knormaled
+  putStrLn $ "After flatting = \n" ++ show flatted ++ "\n"
+
+    where f a = either show show a
+ 
 
   -- let etad = exprToEtaLongExpr `liftM` parsed
   -- putStrLn $ "After eta expansion = \n" ++ show etad ++ "\n"
   --
   -- putStr $ "etamap = \n" ++ (show $ exprToEtaLongMap `liftM` parsed)
   --
-  -- let alphad = exprToAlphaExpr `liftM` etad
-  -- putStrLn $ "After alpha conversion = \n" ++ show alphad ++ "\n"
-  --
-  -- let closured = exprToClosureExpr `liftM` alphad
+ -- let closured = exprToClosureExpr `liftM` alphad
   -- putStrLn $ "After closure translation = \n" ++ show closured ++ "\n"
   --
-  -- let knormaled = exprToKNormalExpr `liftM` closured
-  -- putStrLn $ "After KNormalization = \n" ++ show knormaled ++ "\n"
-  --
-  -- let flatted = exprToFlatExpr `liftM` knormaled
-  -- putStrLn $ "After flatting = \n" ++ show flatted ++ "\n"
-  --
-  -- let ists = exprToDeclareList `liftM` flatted
+ -- let ists = exprToDeclareList `liftM` flatted
   -- putStrLn $ "Declares = \n" ++ show ists
   --
   -- let called = (liftM (liftM (liftM processCall))) ists
