@@ -4,11 +4,11 @@ import qualified Parse as P
 import Control.Monad.State
 import Data.Maybe
 
-newtype Var = Var String
+newtype Var = Var String deriving (Eq)
 instance Show Var where
   show (Var s) = s
 
-data Op = OLess | OPlus | OMinus | OTimes
+data Op = OLess | OPlus | OMinus | OTimes deriving (Eq)
 instance Show Op where
   show OLess = "<"
   show OPlus = "+"
@@ -22,13 +22,14 @@ data Exp = EInt Integer |
            EVar Var |
            ERec Var [Var] Exp Exp |
            EApp Exp [Exp]
+           deriving (Eq)
 instance Show Exp where
   show (EInt i) = show i
   show (EOp o e1 e2) = "(" ++ show o ++ " " ++ show e1 ++ " " ++ show e2 ++ ")"
   show (EIf e1 e2 e3) = "if " ++ show e1 ++ "\nthen " ++ show e2 ++ "\nelse " ++ show e3
   show (ELet v e1 e2) = "let " ++ show v ++ " = " ++ show e1 ++ " in\n" ++ show e2
   show (EVar v) = show v
-  show (ERec x ys e1 e2) = "let rec " ++ show x ++ " " ++ show ys ++ " = " ++ show e1 ++ " in\n" ++ show e2
+  show (ERec x ys e1 e2) = "let rec " ++ show x ++ " " ++ show ys ++ " =\n" ++ show e1 ++ " in\n" ++ show e2
   show (EApp e1 e2s) = show e1 ++ " " ++ show e2s
 
 exprToKNormalExpr :: P.Exp -> Exp
@@ -69,9 +70,11 @@ exprToKNormalExpr' exp = case exp of
     e2' <- exprToKNormalExpr' e2
     return $ ELet s1 e1' (ELet (Var s) (EVar s1) e2')
   P.EApp e1 e2s -> do
+    s1 <- generateNewName
+    s2 <- generateNewName
     e1' <- exprToKNormalExpr' e1
     as <- mapM f e2s
-    return (g as (EApp e1' (map (EVar . fst) as)))
+    return (ELet s2 e1' (ELet s1 (g as (EApp (EVar s2) (map (EVar . fst) as))) (EVar s1)))
       where f e = do
               e' <- exprToKNormalExpr' e
               s <- generateNewName

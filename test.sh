@@ -1,6 +1,6 @@
 #! /bin/sh
 
-stack build
+stack build || exit
 stack exec hml-exe -- -d adder.ml
 echo "-------------------------------"
 stack exec hml-exe -- -d arith.ml
@@ -11,4 +11,5 @@ stack exec hml-exe -- -d fun.ml
 echo "-------------------------------"
 stack exec hml-exe -- -d if.ml
 echo "-------------------------------"
-
+stack exec hml-exe -- -d nestlet.ml
+echo "-------------------------------"

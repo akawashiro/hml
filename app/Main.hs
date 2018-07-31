@@ -8,8 +8,9 @@ import Parse
 import Control.Monad
 import Alpha
 import KNormal
+import NestedLet
 -- import Closure
-import Flat
+-- import Flat
 -- import Declare
 -- import Call
 -- import Register
@@ -47,9 +48,12 @@ showDetails input = do
   let alphad = exprToAlphaExpr `liftM` knormaled
   putStrLn $ "After alpha conversion = \n" ++ f alphad ++ "\n"
 
-  let flatted = exprToFlatExpr `liftM` knormaled
-  putStrLn $ "After flatting = \n" ++ show flatted ++ "\n"
+  let nonNest = expToNonNest `liftM` alphad
+  putStrLn $ "After no-nest conversion = \n" ++ f nonNest ++ "\n"
 
+  -- let flatted = exprToFlatExpr `liftM` alphad
+  -- putStrLn $ "After flatting = \n" ++ show flatted ++ "\n"
+  --
     where f a = either show show a
  
 
