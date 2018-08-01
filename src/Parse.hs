@@ -6,6 +6,7 @@ module Parse where
 import           Control.Monad.Identity
 import           Data.Either
 import           Data.Maybe
+import Data.List
 import           Debug.Trace                            (trace)
 import qualified Text.Parsec.Combinator                 as C (chainl1, chainr1)
 import           Text.ParserCombinators.Parsec
@@ -33,16 +34,18 @@ data Exp = EInt Integer |
            ELet Var Exp Exp |
            EVar Var |
            ERec Var [Var] Exp Exp |
-           EApp Exp [Exp]
+           EApp Exp [Exp] |
+           ETuple [Exp]
 instance Show Exp where
   show (EInt i) = show i
-  show (EBool b) = show b
+  show (EBool b) = if b then "true" else "false"
   show (EIf e1 e2 e3) = "if " ++ show e1 ++ "\nthen " ++ show e2 ++ "\nelse " ++ show e3
   show (EOp o e1 e2) = "(" ++ show o ++ " " ++ show e1 ++ " " ++ show e2 ++ ")"
   show (ELet v e1 e2) = "let " ++ show v ++ " = " ++ show e1 ++ " in\n" ++ show e2
   show (EVar v) = show v
   show (ERec x ys e1 e2) = "let rec " ++ show x ++ " " ++ show ys ++ " = " ++ show e1 ++ " in\n" ++ show e2
   show (EApp e1 e2s) = show e1 ++ " " ++ show e2s
+  show (ETuple es) = "(" ++ concat (intersperse ", " (map show es)) ++ ")"
 
 natDef :: P.GenLanguageDef String () Identity
 natDef = emptyDef { P.reservedNames = keywords, P.reservedOpNames = operators }
@@ -50,7 +53,7 @@ natDef = emptyDef { P.reservedNames = keywords, P.reservedOpNames = operators }
 keywords :: [String]
 keywords = [ "let", "rec", "in", "true", "false", "if", "then", "else", "fun"]
 
-operators = [ "=", "->", "+", "-", "*", "<"]
+operators = [ "=", "->", "+", "-", "*", "<", ","]
 
 
 kwLet         = P.reserved lexer "let"
@@ -68,6 +71,7 @@ kwPlusSymbol  = P.reservedOp lexer "+"
 kwMinusSymbol = P.reservedOp lexer "-"
 kwTimesSymbol = P.reservedOp lexer "*"
 kwLessSymbol  = P.reservedOp lexer "<"
+kwCommaSymbol = P.reservedOp lexer ","
 
 lexer = P.makeTokenParser natDef
 parens = P.parens lexer
@@ -107,8 +111,14 @@ parseExpApp = do
   es <- many1 parseExpAtom
   if length es == 1 then return (head es) else return (EApp (head es) (tail es))
 
+parseExpTuple :: Parser Exp
+parseExpTuple = do
+  h <- parseExp
+  t <- many (kwCommaSymbol >> parseExp)
+  if length t == 0 then return h else return (ETuple (h:t))
+
 parseExpAtom :: Parser Exp
-parseExpAtom = parens parseExp
+parseExpAtom = parens parseExpTuple
                <|> (EBool <$> parseBool)
                <|> try (EInt <$> parseInt)
                <|> (EVar <$> parseVar)

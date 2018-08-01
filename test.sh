@@ -13,3 +13,5 @@ stack exec hml-exe -- -d if.ml
 echo "-------------------------------"
 stack exec hml-exe -- -d nestlet.ml
 echo "-------------------------------"
+stack exec hml-exe -- -d tuple.ml
+echo "-------------------------------"
