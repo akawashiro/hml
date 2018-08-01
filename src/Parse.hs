@@ -32,6 +32,7 @@ data Exp = EInt Integer |
            EOp Op Exp Exp |
            EIf Exp Exp Exp |
            ELet Var Exp Exp |
+           EDTuple [Var] Exp Exp |
            EVar Var |
            ERec Var [Var] Exp Exp |
            EApp Exp [Exp] |
@@ -42,6 +43,7 @@ instance Show Exp where
   show (EIf e1 e2 e3) = "if " ++ show e1 ++ "\nthen " ++ show e2 ++ "\nelse " ++ show e3
   show (EOp o e1 e2) = "(" ++ show o ++ " " ++ show e1 ++ " " ++ show e2 ++ ")"
   show (ELet v e1 e2) = "let " ++ show v ++ " = " ++ show e1 ++ " in\n" ++ show e2
+  show (EDTuple vs e1 e2) = "let (" ++ concat (intersperse ", " (map show vs)) ++ ") = " ++ show e1 ++ " in\n" ++ show e2
   show (EVar v) = show v
   show (ERec x ys e1 e2) = "let rec " ++ show x ++ " " ++ show ys ++ " = " ++ show e1 ++ " in\n" ++ show e2
   show (EApp e1 e2s) = show e1 ++ " " ++ show e2s
@@ -80,6 +82,7 @@ whiteSpace = P.whiteSpace lexer
 parseExp :: Parser Exp
 parseExp = parseExpIf <|>
            try parseExpLet <|>
+           try parseExpDTuple <|>
            parseExpRec <|>
            parseExpLt
 
@@ -88,6 +91,19 @@ parseExpIf = do kwIf; e1<-parseExp; kwThen; e2<-parseExp; kwElse; EIf e1 e2 <$> 
 
 parseExpLet :: Parser Exp
 parseExpLet = do kwLet; x<-parseVar; kwEqual; e1<-parseExp; kwIn; ELet x e1 <$> parseExp;
+
+parseExpDTuple :: Parser Exp
+parseExpDTuple = do 
+  kwLet
+  vs <- parens parseVs
+  kwEqual
+  e1 <- parseExp
+  kwIn
+  EDTuple vs e1 <$> parseExp
+    where parseVs = do
+            h <- parseVar
+            t <- many (kwCommaSymbol >> parseVar)
+            return (h:t)
 
 parseExpRec :: Parser Exp
 parseExpRec = do kwLet; kwRec; x<-parseVar; ys <- many1 parseVar; kwEqual; e1<-parseExp; kwIn; ERec x ys e1 <$> parseExp;
