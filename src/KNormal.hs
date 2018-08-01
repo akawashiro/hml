@@ -3,6 +3,7 @@ module KNormal where
 import qualified Parse as P
 import Control.Monad.State
 import Data.Maybe
+import Data.List
 
 newtype Var = Var String deriving (Eq)
 instance Show Var where
@@ -19,18 +20,22 @@ data Exp = EInt Integer |
            EOp Op Exp Exp |
            EIf Exp Exp Exp |
            ELet Var Exp Exp |
+           EDTuple [Var] Exp Exp |
            EVar Var |
            ERec Var [Var] Exp Exp |
-           EApp Exp [Exp]
+           EApp Exp [Exp] |
+           ETuple [Exp]
            deriving (Eq)
 instance Show Exp where
   show (EInt i) = show i
   show (EOp o e1 e2) = "(" ++ show o ++ " " ++ show e1 ++ " " ++ show e2 ++ ")"
   show (EIf e1 e2 e3) = "if " ++ show e1 ++ "\nthen " ++ show e2 ++ "\nelse " ++ show e3
   show (ELet v e1 e2) = "let " ++ show v ++ " = " ++ show e1 ++ " in\n" ++ show e2
+  show (EDTuple vs e1 e2) = "let (" ++ concat (intersperse ", " (map show vs)) ++ ") = " ++ show e1 ++ " in\n" ++ show e2
   show (EVar v) = show v
   show (ERec x ys e1 e2) = "let rec " ++ show x ++ " " ++ show ys ++ " =\n" ++ show e1 ++ " in\n" ++ show e2
   show (EApp e1 e2s) = show e1 ++ " " ++ show e2s
+  show (ETuple es) = "(" ++ concat (intersperse ", " (map show es)) ++ ")"
 
 exprToKNormalExpr :: P.Exp -> Exp
 exprToKNormalExpr exp = evalState (exprToKNormalExpr' exp) 0
@@ -44,8 +49,6 @@ generateNewName = do
 exprToKNormalExpr' :: P.Exp -> State Int Exp
 exprToKNormalExpr' exp = case exp of
   P.EInt i -> return $ EInt i
-    -- s <- generateNewName
-    -- return $ ELet s (EInt i) (EVar s)
   P.EBool True -> return $ EInt 1
   P.EBool False -> return $ EInt 0
   P.EOp o e1 e2 -> do
