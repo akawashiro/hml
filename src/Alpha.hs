@@ -45,6 +45,12 @@ exprToAlphaExpr' exp = case exp of
     e1' <- exprToAlphaExpr' e1
     e2' <- exprToAlphaExpr' e2
     return $ ELet s' e1' e2'
+  EDTuple vs e1 e2 -> do
+    mapM (addNewName "val_") vs
+    vs' <- mapM rename vs
+    e1' <- exprToAlphaExpr' e1
+    e2' <- exprToAlphaExpr' e2
+    return $ EDTuple vs' e1' e2'
   EApp e1 e2 -> do
     e1' <- exprToAlphaExpr' e1
     e2' <- mapM exprToAlphaExpr' e2
@@ -60,3 +66,6 @@ exprToAlphaExpr' exp = case exp of
   EVar s -> do
     s' <- rename s
     return $ EVar s'
+  ETuple es -> do
+    es' <- mapM exprToAlphaExpr' es
+    return $ ETuple es'
