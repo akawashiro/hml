@@ -9,6 +9,7 @@ import Control.Monad
 import Alpha
 import KNormal
 import NestedLet
+import Closure
 -- import Closure
 -- import Flat
 -- import Declare
@@ -50,6 +51,9 @@ showDetails input = do
 
   let nonNest = expToNonNest `liftM` alphad
   putStrLn $ "After no-nest conversion = \n" ++ f nonNest ++ "\n"
+
+  let closured = clsTrans `liftM` nonNest
+  putStrLn $ "After closure translation = \n" ++ f closured ++ "\n"
 
   -- let flatted = exprToFlatExpr `liftM` alphad
   -- putStrLn $ "After flatting = \n" ++ show flatted ++ "\n"

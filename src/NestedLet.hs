@@ -7,7 +7,6 @@ import Data.Maybe
 import qualified Data.Map as Map
 
 expToNonNest e = if e == expToNonNest' e then e else expToNonNest (expToNonNest' e)
--- expToNonNest e = expToNonNest' $ expToNonNest' $ expToNonNest' e
 
 expToNonNest' :: Exp -> Exp
 expToNonNest' (ELet x e1 e2) =
