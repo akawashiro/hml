@@ -34,34 +34,23 @@ instance Show Exp where
 
 data FunDef = FunDef Var [Var] Exp deriving (Eq)
 instance Show FunDef where
-  show (FunDef x ys e) = "fundef " ++ show x ++ " " ++ intercalate " " (map show ys) ++ " = " ++ show e
+  show (FunDef x ys e) = "fundef " ++ show x ++ " " ++ intercalate " " (map show ys) ++ " =\n" ++ show e
 
--- ClsDef is used in next step to extract free variables from closure.
--- ClsDef name_of_closure (label_of_function:list_of_free_variables)
-data ClsDef = ClsDef Var [Var] deriving (Eq)
-instance Show ClsDef where
-  show (ClsDef x ys) = "clsdef " ++ show x ++ " = (" ++ intercalate "," (map show ys) ++ ")"
-
-data Prog = Prog [ClsDef] [FunDef] Exp deriving (Eq)
+data Prog = Prog [FunDef] Exp deriving (Eq)
 instance Show Prog where
-  show (Prog cd fd exp) = intercalate "\n" (map show cd) ++ "\n" ++ intercalate "\n" (map show fd) ++ "\n" ++ show exp 
+  show (Prog fd exp) = intercalate "\n" (map show fd) ++ "\n" ++ show exp 
 
-type ClsTransM = State ([ClsDef],[FunDef])
-
-addClsDef :: ClsDef -> ClsTransM ()
-addClsDef cd = do
-  (cs,fs) <- get
-  put (cd:cs,fs)
+type ClsTransM = State [FunDef]
 
 addFunDef :: FunDef -> ClsTransM ()
 addFunDef fd = do
-  (cs,fs) <- get
-  put (cs, fd:fs)
+  fs <- get
+  put (fd:fs)
 
 clsTrans :: K.Exp -> Prog
 clsTrans exp = 
-  let (e,(cd,fd)) = runState (clsTrans' exp) ([],[]) in
-  Prog cd fd e
+  let (e,fd) = runState (clsTrans' exp) [] in
+  Prog fd e
 
 clsTrans' :: K.Exp -> ClsTransM Exp
 clsTrans' (K.EInt i) = return (EInt i)
@@ -76,15 +65,19 @@ clsTrans' (K.ERec x ys e1 e2) = do
   e1' <- clsTrans' e1
   e2' <- clsTrans' e2
   let fvs = fv e1 `lminus` (x:ys)
-  let cld = ClsDef (v2v x) (v2l x:map v2v fvs)
-  addClsDef cld
-  let fd = FunDef (v2l x) (map v2v fvs ++ map v2v ys) e1'
+  let fd = FunDef (v2l x) (v2cls x:map v2v ys) (EDTuple (v2tmp x:map v2v fvs) (EVar (v2cls x)) e1')
   addFunDef fd
   return $ ELet (v2v x) (ETuple (map EVar (v2l x:map v2v fvs))) e2'
 
 
 v2v :: K.Var -> Var
 v2v (K.Var s) = Var s
+
+v2cls :: K.Var -> Var
+v2cls (K.Var s) = Var ("cls_" ++ s)
+
+v2tmp :: K.Var -> Var
+v2tmp (K.Var s) = Var ("tmp_" ++ s)
 
 v2l :: K.Var -> Var
 v2l (K.Var s) = Label ("def_" ++ s)
