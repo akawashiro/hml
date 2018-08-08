@@ -4,14 +4,20 @@ module Closure where
 
 import qualified KNormal as K
 import Data.List
+import Control.Monad.State
+
+data Var = Var String | Label String deriving (Eq)
+instance Show Var where
+  show (Var s) = s
+  show (Label s) = s
 
 data Exp = EInt Integer | 
            EOp K.Op Exp Exp |
            EIf Exp Exp Exp |
-           ELet K.Var Exp Exp |
-           EDTuple [K.Var] Exp Exp |
-           EVar K.Var |
-           ERec K.Var [K.Var] Exp Exp |
+           ELet Var Exp Exp |
+           EDTuple [Var] Exp Exp |
+           EVar Var |
+           ERec Var [Var] Exp Exp |
            EAppCls Exp [Exp] |
            ETuple [Exp]
            deriving (Eq)
@@ -25,6 +31,39 @@ instance Show Exp where
   show (ERec x ys e1 e2) = "let rec " ++ show x ++ " " ++ show ys ++ " =\n" ++ show e1 ++ " in\n" ++ show e2
   show (EAppCls e1 e2s) = show e1 ++ " " ++ show e2s
   show (ETuple es) = "(" ++ concat (intersperse ", " (map show es)) ++ ")"
+
+data FunDef = FunDef Var [Var] Exp deriving (Eq)
+
+-- ClsDef is used in next step to extract free variables from closure.
+-- ClsDef name_of_closure label_of_function list_of_free_variables
+data ClsDef = ClsDef Var Var [Var] deriving (Eq)
+
+data Prog = Prog [ClsDef] [FunDef] Exp
+
+type ClsTransM = State ([ClsDef],[FunDef])
+
+addClsDef :: ClsDef -> ClsTransM ()
+addClsDef = undefined
+
+addFunDef :: FunDef -> ClsTransM ()
+addFunDef = undefined
+
+clsTrans :: K.Exp -> Prog
+clsTrans = undefined
+
+clsTrans' :: K.Exp -> ClsTransM Exp
+clsTrans' (K.EInt i) = return (EInt i)
+clsTrans' (K.EOp o e1 e2) = (EOp o) <$> clsTrans' e1 <*> clsTrans' e2
+clsTrans' (K.EIf e1 e2 e3) = EIf <$> clsTrans' e1 <*> clsTrans' e2 <*> clsTrans' e3
+clsTrans' (K.ELet (K.Var x) e1 e2) = (ELet (Var x)) <$> clsTrans' e1 <*> clsTrans' e2
+clsTrans' (K.EDTuple xs e1 e2) = (EDTuple (map v2v xs)) <$> clsTrans' e1 <*> clsTrans' e2
+clsTrans' (K.EVar (K.Var s)) = return (EVar (Var s))
+clsTrans' (K.EApp e1 e2) = EAppCls <$> clsTrans' e1 <*> mapM clsTrans' e2
+clsTrans' (K.ETuple es) = ETuple <$> mapM clsTrans' es
+clsTrans' (K.ERec x ys e1 e2) = undefined
+
+v2v :: K.Var -> Var
+v2v (K.Var s) = Var s
 
 adder :: K.Exp
 adder = (K.ERec (K.Var "make_adder") [(K.Var "x")]
